@@ -6,14 +6,14 @@ SHOWMYACCOUNTS
 Returns a list of all the customers accounts along with their current balance 
 e.g. Main: 1000.0 
 
-NEWACCOUNT <Name>
+NEWACCOUNT <Name>  (TODO)
 e.g. NEWACCOUNT Savings
 Returns SUCCESS or FAIL
 
-MOVE <Amount> <From> <To>
+MOVE <Amount> <From> <To>  (TODO)
 e.g. MOVE 100 Main Savings 
 Returns SUCCESS or FAIL
 
-PAY <Person/Company> <Ammount>
+PAY <Person/Company> <Ammount>  (TODO)
 e.g. PAY John 100
 Returns SUCCESS or FAIL
