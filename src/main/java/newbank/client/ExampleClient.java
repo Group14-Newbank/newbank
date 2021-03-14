@@ -27,8 +27,14 @@ public class ExampleClient extends Thread {
           public void run() {
             try {
               while (true) {
-                String responce = bankServerIn.readLine();
-                System.out.println(responce);
+                String response = bankServerIn.readLine();
+
+                if (response == null) {
+                  // socket broken, end thread
+                  return;
+                }
+
+                System.out.println(response);
               }
             } catch (IOException e) {
               e.printStackTrace();
@@ -44,6 +50,12 @@ public class ExampleClient extends Thread {
       try {
         while (true) {
           String command = userInput.readLine();
+
+          if (command == null) {
+            // EOF reached, end thread
+            return;
+          }
+
           bankServerOut.println(command);
         }
       } catch (IOException e) {
