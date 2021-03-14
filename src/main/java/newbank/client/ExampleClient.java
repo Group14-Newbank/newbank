@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+
+import newbank.utils.ConsoleDisplay;
+import newbank.utils.Display;
 
 public class ExampleClient extends Thread {
 
@@ -13,10 +17,12 @@ public class ExampleClient extends Thread {
   private PrintWriter bankServerOut;
   private BufferedReader userInput;
   private Thread bankServerResponceThread;
+  private Display display = new ConsoleDisplay();
 
-  public ExampleClient(String ip, int port) throws UnknownHostException, IOException {
+  public ExampleClient(String ip, int port, Reader reader)
+      throws UnknownHostException, IOException {
     server = new Socket(ip, port);
-    userInput = new BufferedReader(new InputStreamReader(System.in));
+    userInput = new BufferedReader(reader);
     bankServerOut = new PrintWriter(server.getOutputStream(), true);
 
     bankServerResponceThread =
@@ -34,7 +40,7 @@ public class ExampleClient extends Thread {
                   return;
                 }
 
-                System.out.println(response);
+                display.writeLine(response);
               }
             } catch (IOException e) {
               e.printStackTrace();
@@ -43,6 +49,10 @@ public class ExampleClient extends Thread {
           }
         };
     bankServerResponceThread.start();
+  }
+
+  public void setDisplay(Display display) {
+    this.display = display;
   }
 
   public void run() {
@@ -67,6 +77,6 @@ public class ExampleClient extends Thread {
 
   public static void main(String[] args)
       throws UnknownHostException, IOException, InterruptedException {
-    new ExampleClient("localhost", 14002).start();
+    new ExampleClient("localhost", 14002, new InputStreamReader(System.in)).start();
   }
 }
