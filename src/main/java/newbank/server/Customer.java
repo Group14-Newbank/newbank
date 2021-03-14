@@ -7,7 +7,7 @@ import newbank.server.exceptions.CustomerMaxAccountsException;
 public class Customer {
   private String username;
   private String password;
-  private ArrayList<Account> accounts;
+  private final ArrayList<Account> accounts;
 
   public static final int MAX_ACCOUNTS = 5;
 
@@ -18,11 +18,11 @@ public class Customer {
   }
 
   public String accountsToString() {
-    String s = "";
+    StringBuilder s = new StringBuilder();
     for (Account a : accounts) {
-      s += a.toString();
+      s.append(a.toString());
     }
-    return s;
+    return s.toString();
   }
 
   public void addAccount(Account account) throws CustomerMaxAccountsException {

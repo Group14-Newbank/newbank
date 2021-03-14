@@ -13,10 +13,11 @@ import newbank.utils.Display;
 
 public class ExampleClient extends Thread {
 
-  private Socket server;
-  private PrintWriter bankServerOut;
-  private BufferedReader userInput;
-  private Thread bankServerResponseThread;
+  public static final int DEFAULT_PORT = 14002;
+  private final Socket server;
+  private final PrintWriter bankServerOut;
+  private final BufferedReader userInput;
+  private final Thread bankServerResponseThread;
   private Display display = new ConsoleDisplay();
 
   public ExampleClient(String ip, int port, Reader reader)
@@ -27,14 +28,13 @@ public class ExampleClient extends Thread {
 
     bankServerResponseThread =
         new Thread() {
-          private BufferedReader bankServerIn =
+          private final BufferedReader bankServerIn =
               new BufferedReader(new InputStreamReader(server.getInputStream()));
 
           public void run() {
             try {
               while (true) {
                 String response = bankServerIn.readLine();
-
                 if (response == null) {
                   // socket broken, end thread
                   return;
@@ -44,7 +44,6 @@ public class ExampleClient extends Thread {
               }
             } catch (IOException e) {
               e.printStackTrace();
-              return;
             }
           }
         };
@@ -77,6 +76,6 @@ public class ExampleClient extends Thread {
 
   public static void main(String[] args)
       throws UnknownHostException, IOException, InterruptedException {
-    new ExampleClient("localhost", 14002, new InputStreamReader(System.in)).start();
+    new ExampleClient("localhost", DEFAULT_PORT, new InputStreamReader(System.in)).start();
   }
 }
