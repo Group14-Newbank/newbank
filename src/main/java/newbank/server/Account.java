@@ -28,6 +28,6 @@ public class Account {
   }
 
   public String toString() {
-    return (accountName + ": " + openingBalance);
+    return (String.format("%s: %s", accountName, openingBalance));
   }
 }
