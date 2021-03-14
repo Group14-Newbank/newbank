@@ -9,18 +9,17 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestNewBank {
-	private static NewBank bank;
-	
-	@BeforeClass
-	public static void setupBank() {
-		bank = NewBank.getBank();
-		bank.addCustomer( "customer1", "123456" );
-	}
+  private static NewBank bank;
 
-	@Test
-	public void checkCanLogIn() {
-		assertThat( bank.checkLogInDetails( "customer1", "123" ), nullValue() );
-		assertThat( bank.checkLogInDetails( "customer1", "123456" ), not( equalTo( nullValue() ) ) );
-	}
-	
+  @BeforeClass
+  public static void setupBank() {
+    bank = NewBank.getBank();
+    bank.addCustomer("customer1", "123456");
+  }
+
+  @Test
+  public void checkCanLogIn() {
+    assertThat(bank.checkLogInDetails("customer1", "123"), nullValue());
+    assertThat(bank.checkLogInDetails("customer1", "123456"), not(equalTo(nullValue())));
+  }
 }
