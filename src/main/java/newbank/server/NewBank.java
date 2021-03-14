@@ -3,7 +3,6 @@ package newbank.server;
 import java.util.HashMap;
 
 public class NewBank {
-
   private static final NewBank bank = new NewBank();
   private HashMap<String, Customer> customers;
 
