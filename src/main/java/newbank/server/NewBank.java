@@ -6,7 +6,6 @@ import newbank.server.exceptions.AccountInvalidNameException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 
 public class NewBank {
-
   private static final NewBank bank = new NewBank();
   private HashMap<String, Customer> customers;
 
