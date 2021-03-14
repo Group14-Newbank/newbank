@@ -14,6 +14,23 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 ##############################
+## Eclipse
+##############################
+.settings/
+bin/
+tmp/
+.metadata
+.classpath
+.project
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.factorypath
+
+##############################
 ## IntelliJ
 ##############################
 out/
@@ -35,24 +52,6 @@ out/
 hs_err_pid*
 
 ##############################
-## Eclipse
-##############################
-.settings/
-bin/
-tmp/
-.metadata
-.classpath
-.project
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.loadpath
-.factorypath
-
-##############################
 ## Miscellaneous
 ##############################
-.idea
 .DS_Store
