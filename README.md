@@ -54,6 +54,3 @@ java newbank.client.ExampleClient
 - Take full ownership of your task: respond to the comments, update the branch, merge as soon as it's possible (so that the PR does not become stale), handle potential issues and bugs even after the merge. If no one is reviewing/responding in a timely manner, make use of the Discord channel.
 - Vice versa, proactively help your team mates with their pull requests.
 - Try to keep PRs small (you can split a task into subtasks), so that it's more likely the team will understand them, and less likely they will cause bugs or diverge too much from the main branch.
-
-## Sprint 1
-Our goal for this sprint is to have a basic implementation of a few commands.
