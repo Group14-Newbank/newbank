@@ -2,10 +2,14 @@ package newbank.server;
 
 import java.util.ArrayList;
 
+import newbank.server.exceptions.CustomerMaxAccountsException;
+
 public class Customer {
   private String username;
   private String password;
   private ArrayList<Account> accounts;
+
+  public static final int MAX_ACCOUNTS = 5;
 
   public Customer(final String username, final String password) {
     this.username = username;
@@ -21,7 +25,11 @@ public class Customer {
     return s;
   }
 
-  public void addAccount(Account account) {
+  public void addAccount(Account account) throws CustomerMaxAccountsException {
+    if (accounts.size() >= MAX_ACCOUNTS) {
+      throw new CustomerMaxAccountsException(MAX_ACCOUNTS);
+    }
+
     accounts.add(account);
   }
 
