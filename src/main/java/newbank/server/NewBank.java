@@ -28,9 +28,7 @@ public class NewBank {
       Customer john = new Customer("John", "john");
       john.addAccount(new Account("Checking", 250.0));
       customers.put("John", john);
-    } catch (AccountInvalidNameException e) {
-
-    } catch (CustomerMaxAccountsException e) {
+    } catch (Exception e) {
 
     }
   }
