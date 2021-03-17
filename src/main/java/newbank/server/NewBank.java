@@ -106,13 +106,11 @@ public class NewBank {
     try {
       Account account = new Account(accountName, 0);
 
-      try {
-        customer.addAccount(account);
+      customer.addAccount(account);
 
-        return "The account has been created successfully.";
-      } catch (CustomerMaxAccountsException e) {
-        return "FAIL: Maximum number of accounts is: " + e.getMaxAccounts();
-      }
+      return "The account has been created successfully.";
+    } catch (CustomerMaxAccountsException e) {
+      return "FAIL: Maximum number of accounts is: " + e.getMaxAccounts();
     } catch (AccountInvalidNameException e) {
       return "FAIL: Invalid account name: " + e.getMessage();
     }
