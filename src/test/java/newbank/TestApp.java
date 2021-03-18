@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
 
+import newbank.client.ConfigurationException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -35,13 +36,13 @@ public class TestApp {
   }
 
   @BeforeClass
-  public static void beforeAll()  throws IOException, InterruptedException {
+  public static void beforeAll()  throws IOException {
     server = new NewBankServer(NewBankServer.DEFAULT_SERVER_PORT);
     server.start();
   }
 
   @Before
-  public void setup() throws IOException, InterruptedException {
+  public void setup() throws IOException, ConfigurationException {
     reader = new PipedReader();
     writer = new PipedWriter(reader);
     display = new QueueDisplay();
