@@ -35,7 +35,12 @@ public class NewBankClientHandler extends Thread {
         out.println("Log In Successful. What do you want to do?");
         while (true) {
           String request = in.readLine();
-          System.out.println("Request from " + customer.getKey());
+          out.printf("Received request [%s] from %s\n", request, customer.getKey());
+
+          if (request.equals("QUIT")) {
+            return;
+          }
+
           String responce = bank.processRequest(customer, request);
           out.println(responce);
         }
