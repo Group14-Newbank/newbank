@@ -27,7 +27,7 @@ public class Customer {
 
   public void addAccount(Account account) throws CustomerMaxAccountsException {
     if (accounts.size() >= MAX_ACCOUNTS) {
-      throw new CustomerMaxAccountsException(MAX_ACCOUNTS);
+      throw new CustomerMaxAccountsException();
     }
 
     accounts.add(account);
