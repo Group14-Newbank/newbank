@@ -27,8 +27,12 @@ public class NewBank {
       Customer john = new Customer("John", "john");
       john.addAccount(new Account("Checking", 250.0));
       customers.put("John", john);
-    } catch (Exception e) {
-
+    } catch (CustomerMaxAccountsException e) {
+      System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
+      System.exit(1);
+    } catch (AccountInvalidNameException e) {
+      System.err.println("FAIL: Invalid account name: " + e.getMessage());
+      System.exit(1);
     }
   }
 
@@ -55,10 +59,13 @@ public class NewBank {
    */
   public synchronized CustomerID checkLogInDetails(final String username, final String password) {
     if (customers.containsKey(username)) {
+      System.out.println("Halo");
+
       if (credentialsAreValid(username, password)) {
         return new CustomerID(username);
       }
     }
+    System.out.println("gg");
     return null;
   }
 
@@ -109,7 +116,7 @@ public class NewBank {
 
       return "The account has been created successfully.";
     } catch (CustomerMaxAccountsException e) {
-      return "FAIL: Maximum number of accounts is: " + e.getMaxAccounts();
+      return "FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS;
     } catch (AccountInvalidNameException e) {
       return "FAIL: Invalid account name: " + e.getMessage();
     }
