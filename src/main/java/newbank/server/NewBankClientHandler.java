@@ -20,14 +20,16 @@ public class NewBankClientHandler extends Thread {
 
   public void run() {
     try {
-      CustomerID customer = logIn();
-      // if the user is authenticated then get requests from the user and process them
-      if (customer != null) {
-        out.println("Log In Successful. What do you want to do?");
-        handleRequests(customer);
-      } else {
-        out.println("Log In Failed");
+      CustomerID customer;
+      while (true) {
+        customer = logIn();
+        if (customer == null) {
+          out.println("Log In Failed");
+        } else break;
       }
+      // The user is authenticated. Get requests from the user and process them.
+      out.println("Log In Successful. What do you want to do?");
+      handleRequests(customer);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
