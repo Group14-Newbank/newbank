@@ -2,6 +2,9 @@ package newbank.server;
 
 import java.util.HashMap;
 
+import newbank.server.exceptions.AccountInvalidNameException;
+import newbank.server.exceptions.CustomerMaxAccountsException;
+
 public class NewBank {
   private static final NewBank bank = new NewBank();
   private HashMap<String, Customer> customers;
@@ -12,17 +15,25 @@ public class NewBank {
   }
 
   private void addTestData() {
-    Customer bhagy = new Customer("Bhagy", "bhagy");
-    bhagy.addAccount(new Account("Main", 1000.0));
-    customers.put("Bhagy", bhagy);
+    try {
+      Customer bhagy = new Customer("Bhagy", "bhagy");
+      bhagy.addAccount(new Account("Main", 1000.0));
+      customers.put("Bhagy", bhagy);
 
-    Customer christina = new Customer("Christina", "christina");
-    christina.addAccount(new Account("Savings", 1500.0));
-    customers.put("Christina", christina);
+      Customer christina = new Customer("Christina", "christina");
+      christina.addAccount(new Account("Savings", 1500.0));
+      customers.put("Christina", christina);
 
-    Customer john = new Customer("John", "john");
-    john.addAccount(new Account("Checking", 250.0));
-    customers.put("John", john);
+      Customer john = new Customer("John", "john");
+      john.addAccount(new Account("Checking", 250.0));
+      customers.put("John", john);
+    } catch (CustomerMaxAccountsException e) {
+      System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
+      System.exit(1);
+    } catch (AccountInvalidNameException e) {
+      System.err.println("FAIL: Invalid account name: " + e.getMessage());
+      System.exit(1);
+    }
   }
 
   /**
@@ -62,19 +73,49 @@ public class NewBank {
   }
 
   // commands from the NewBank customer are processed in this method
-  public synchronized String processRequest(CustomerID customer, String request) {
-    if (customers.containsKey(customer.getKey())) {
-      switch (request) {
-        case "SHOWMYACCOUNTS":
-          return showMyAccounts(customer);
-        default:
-          return "FAIL";
-      }
+  public synchronized String processRequest(CustomerID customerID, String request) {
+    Customer customer = customers.get(customerID.getKey());
+    if (customer == null) {
+      return "FAIL: Customer not found.";
     }
-    return "FAIL";
+
+    String[] args = request.split("\\s+");
+    if (args.length == 0) {
+      return "FAIL: Invalid command.";
+    }
+
+    String command = args[0];
+    switch (command) {
+    case "SHOWMYACCOUNTS":
+      return showMyAccounts(customer);
+
+    case "NEWACCOUNT":
+      if (args.length != 2) {
+        return "FAIL: The proper syntax is: NEWACCOUNT <Name>";
+      }
+
+      return newAccount(customer, args[1]);
+
+    default:
+      return "FAIL: Unknown command.";
+    }
   }
 
-  private String showMyAccounts(CustomerID customer) {
-    return (customers.get(customer.getKey())).accountsToString();
+  private String showMyAccounts(Customer customer) {
+    return customer.accountsToString();
+  }
+
+  private String newAccount(Customer customer, String accountName) {
+    try {
+      Account account = new Account(accountName, 0);
+
+      customer.addAccount(account);
+
+      return "The account has been created successfully.";
+    } catch (CustomerMaxAccountsException e) {
+      return "FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS;
+    } catch (AccountInvalidNameException e) {
+      return "FAIL: Invalid account name: " + e.getMessage();
+    }
   }
 }
