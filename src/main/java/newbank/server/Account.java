@@ -19,11 +19,11 @@ public class Account {
   private void validate(String accountName, double openingBalance) throws AccountInvalidNameException {
     if (accountName.length() < MIN_NAME_LENGTH || accountName.length() > MAX_NAME_LENGTH) {
       throw new AccountInvalidNameException(
-          "Length must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters!");
+          "Length must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.");
     }
 
     if (!accountName.matches("[a-zA-Z]+")) {
-      throw new AccountInvalidNameException("Only letters are allowed!");
+      throw new AccountInvalidNameException("Only letters are allowed.");
     }
   }
 

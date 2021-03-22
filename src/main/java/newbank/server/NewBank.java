@@ -59,13 +59,10 @@ public class NewBank {
    */
   public synchronized CustomerID checkLogInDetails(final String username, final String password) {
     if (customers.containsKey(username)) {
-      System.out.println("Halo");
-
       if (credentialsAreValid(username, password)) {
         return new CustomerID(username);
       }
     }
-    System.out.println("gg");
     return null;
   }
 
@@ -79,12 +76,12 @@ public class NewBank {
   public synchronized String processRequest(CustomerID customerID, String request) {
     Customer customer = customers.get(customerID.getKey());
     if (customer == null) {
-      return "FAIL: Customer not found!";
+      return "FAIL: Customer not found.";
     }
 
     String[] args = request.split("\\s+");
     if (args.length == 0) {
-      return "FAIL: Invalid command!";
+      return "FAIL: Invalid command.";
     }
 
     String command = args[0];
@@ -100,7 +97,7 @@ public class NewBank {
       return newAccount(customer, args[1]);
 
     default:
-      return "FAIL: Unknown command!";
+      return "FAIL: Unknown command.";
     }
   }
 
