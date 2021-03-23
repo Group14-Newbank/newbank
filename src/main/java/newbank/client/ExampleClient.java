@@ -16,7 +16,7 @@ public class ExampleClient extends Thread {
   private Socket server;
   private PrintWriter bankServerOut;
   private BufferedReader userInput;
-  private Thread bankServerResponceThread;
+  private Thread bankServerResponseThread;
   private Display display = new ConsoleDisplay();
 
   public ExampleClient(String ip, int port, Reader reader)
@@ -25,7 +25,7 @@ public class ExampleClient extends Thread {
     userInput = new BufferedReader(reader);
     bankServerOut = new PrintWriter(server.getOutputStream(), true);
 
-    bankServerResponceThread =
+    bankServerResponseThread =
         new Thread() {
           private BufferedReader bankServerIn =
               new BufferedReader(new InputStreamReader(server.getInputStream()));
@@ -48,7 +48,7 @@ public class ExampleClient extends Thread {
             }
           }
         };
-    bankServerResponceThread.start();
+    bankServerResponseThread.start();
   }
 
   public void setDisplay(Display display) {
