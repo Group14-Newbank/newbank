@@ -1,9 +1,12 @@
 package newbank.server;
 
 import java.util.HashMap;
+import java.util.Optional;
 
-import newbank.server.exceptions.AccountInvalidNameException;
+import newbank.server.exceptions.AccountNameInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
+import newbank.server.exceptions.DuplicateCustomerException;
+import newbank.server.exceptions.PasswordInvalidException;
 
 public class NewBank {
   private static final NewBank bank = new NewBank();
@@ -30,7 +33,7 @@ public class NewBank {
     } catch (CustomerMaxAccountsException e) {
       System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
       System.exit(1);
-    } catch (AccountInvalidNameException e) {
+    } catch (AccountNameInvalidException e) {
       System.err.println("FAIL: Invalid account name: " + e.getMessage());
       System.exit(1);
     }
@@ -42,8 +45,22 @@ public class NewBank {
    * @param username The customer's username
    * @param password The customer's password
    */
-  public void addCustomer(final String username, final String password) {
+  public void addCustomer(final String username, final String password)
+      throws DuplicateCustomerException, PasswordInvalidException {
+    if (customers.containsKey(username)) {
+      throw new DuplicateCustomerException();
+    }
+
+    validatePassword(password);
+
     customers.put(username, new Customer(username, password));
+  }
+
+  // Simple algorithm to check that the password meets the security requirements
+  private void validatePassword(final String password) throws PasswordInvalidException {
+    if (password.isEmpty()) {
+      throw new PasswordInvalidException();
+    }
   }
 
   public static NewBank getBank() {
@@ -66,56 +83,67 @@ public class NewBank {
     return null;
   }
 
+  /**
+   * Retrieve and display account information for a given customer
+   *
+   * @param customerID The customer identifier
+   * @return account information
+   */
+  public synchronized String showAccountsFor(final CustomerID customerID) {
+    Customer customer = customers.get(customerID.getKey());
+
+    return showAccountsFor(customer);
+  }
+
+  private String showAccountsFor(final Customer customer) {
+    return customer.accountsToString();
+  }
+
   private boolean credentialsAreValid(final String username, final String password) {
     assert (customers.containsKey(username));
 
     return customers.get(username).getPassword().equals(password);
   }
 
-  // commands from the NewBank customer are processed in this method
-  public synchronized String processRequest(CustomerID customerID, String request) {
+  /**
+   * Create a new account for a given customer
+   *
+   * @param customerID The customer identifier
+   * @param accountName the account name
+   * @return a success indicator if the operation was successful, otherwise an error message
+   */
+  public synchronized String newAccount(final CustomerID customerID, final String accountName) {
     Customer customer = customers.get(customerID.getKey());
-    if (customer == null) {
-      return "FAIL: Customer not found.";
-    }
 
-    String[] args = request.split("\\s+");
-    if (args.length == 0) {
-      return "FAIL: Invalid command.";
-    }
-
-    String command = args[0];
-    switch (command) {
-    case "SHOWMYACCOUNTS":
-      return showMyAccounts(customer);
-
-    case "NEWACCOUNT":
-      if (args.length != 2) {
-        return "FAIL: The proper syntax is: NEWACCOUNT <Name>";
-      }
-
-      return newAccount(customer, args[1]);
-
-    default:
-      return "FAIL: Unknown command.";
-    }
+    return newAccount(customer, accountName);
   }
 
-  private String showMyAccounts(Customer customer) {
-    return customer.accountsToString();
-  }
-
-  private String newAccount(Customer customer, String accountName) {
+  private String newAccount(final Customer customer, final String accountName) {
     try {
-      Account account = new Account(accountName, 0);
+      Account account = new Account(accountName, 0.0);
 
       customer.addAccount(account);
 
-      return "The account has been created successfully.";
+      return "SUCCESS: The account has been created successfully.";
     } catch (CustomerMaxAccountsException e) {
       return "FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS;
-    } catch (AccountInvalidNameException e) {
+    } catch (AccountNameInvalidException e) {
       return "FAIL: Invalid account name: " + e.getMessage();
     }
+  }
+
+  /**
+   * Retrieves the customer with a given name
+   *
+   * @param customerName
+   * @return
+   */
+  public synchronized Optional<Customer> getCustomer(final String customerName) {
+    return customers
+        .entrySet()
+        .stream()
+        .filter(e -> e.getValue().getUsername().equals(customerName))
+        .findFirst()
+        .map(e -> e.getValue());
   }
 }

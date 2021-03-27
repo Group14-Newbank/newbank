@@ -40,4 +40,15 @@ public class Customer {
   public String getPassword() {
     return password;
   }
+  
+  @Override
+  public String toString() {
+	  StringBuilder sb = new StringBuilder();
+	  sb.append(this.getClass().getName() + "[");
+	  sb.append("username=" + username + ", ");
+	  sb.append("password=" + password + ", ");
+	  sb.append("accounts=" + this.accountsToString());
+	  sb.append("]");
+	  return sb.toString();
+  }
 }
