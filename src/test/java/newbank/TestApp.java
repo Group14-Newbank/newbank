@@ -36,7 +36,7 @@ public class TestApp {
   }
 
   @BeforeClass
-  public static void beforeAll()  throws IOException {
+  public static void beforeAll() throws IOException, InterruptedException {
     server = new NewBankServer(NewBankServer.DEFAULT_SERVER_PORT);
     server.start();
   }
@@ -58,12 +58,13 @@ public class TestApp {
     client.interrupt();
   }
 
+  private void logIn(final String username, final String password) throws IOException {
+    writer.write(String.format("LOGIN %s %s \n", username, password));
+  }
+
   @Test
   public void canDisplayBalance() throws IOException {
-    display.discardLinesUntil("Username");
-    writer.write("Bhagy\n");
-    display.discardLinesUntil("Password");
-    writer.write("bhagy\n");
+    logIn("Bhagy", "bhagy");
     display.discardLinesUntil("Successful");
 
     String result = testCommand("SHOWMYACCOUNTS\n");
@@ -75,35 +76,36 @@ public class TestApp {
 
   @Test
   public void canCreateNewAccount() throws IOException {
-    display.discardLinesUntil("Username");
-    writer.write("John\n");
-    display.discardLinesUntil("Password");
-    writer.write("john\n");
-    display.discardLinesUntil("Successful");
-
     String response;
+
+    logIn("John", "john");
+    display.discardLinesUntil("Successful");
 
     response = testCommand("NEWACCOUNT\n");
     assertThat(response, equalTo("FAIL: The proper syntax is: NEWACCOUNT <Name>"));
 
     response = testCommand("NEWACCOUNT abc\n");
-    assertThat(response, equalTo("FAIL: Invalid account name: Length must be between 4 and 12 characters."));
+    assertThat(
+        response,
+        equalTo("FAIL: Invalid account name: Length must be between 4 and 12 characters."));
 
     response = testCommand("NEWACCOUNT ArkadiuszMichowski\n");
-    assertThat(response, equalTo("FAIL: Invalid account name: Length must be between 4 and 12 characters."));
+    assertThat(
+        response,
+        equalTo("FAIL: Invalid account name: Length must be between 4 and 12 characters."));
 
     response = testCommand("NEWACCOUNT 123456\n");
     assertThat(response, equalTo("FAIL: Invalid account name: Only letters are allowed."));
 
     response = testCommand("NEWACCOUNT accountB\n");
-    assertThat(response, equalTo("The account has been created successfully."));
+    assertThat(response, equalTo("SUCCESS: The account has been created successfully."));
 
     response = testCommand("NEWACCOUNT accountC\n");
-    assertThat(response, equalTo("The account has been created successfully."));
+    assertThat(response, equalTo("SUCCESS: The account has been created successfully."));
     response = testCommand("NEWACCOUNT accountD\n");
-    assertThat(response, equalTo("The account has been created successfully."));
+    assertThat(response, equalTo("SUCCESS: The account has been created successfully."));
     response = testCommand("NEWACCOUNT accountE\n");
-    assertThat(response, equalTo("The account has been created successfully."));
+    assertThat(response, equalTo("SUCCESS: The account has been created successfully."));
 
     response = testCommand("NEWACCOUNT accountF\n");
     assertThat(response, equalTo("FAIL: Maximum number of accounts is: 5"));
