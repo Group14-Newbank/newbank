@@ -8,9 +8,9 @@ import java.net.Socket;
 
 public class NewBankClientHandler extends Thread {
 
-  private NewBank bank;
-  private BufferedReader in;
-  private PrintWriter out;
+  private final NewBank bank;
+  private final BufferedReader in;
+  private final PrintWriter out;
 
   public NewBankClientHandler(Socket s) throws IOException {
     bank = NewBank.getBank();
@@ -19,34 +19,17 @@ public class NewBankClientHandler extends Thread {
   }
 
   public void run() {
-    // keep getting requests from the client and processing them
     try {
-      // ask for user name
-      out.println("Enter Username");
-      String userName = in.readLine();
-      // ask for password
-      out.println("Enter Password");
-      String password = in.readLine();
-      out.println("Checking Details...");
-      // authenticate user and get customer ID token from bank for use in subsequent requests
-      CustomerID customer = bank.checkLogInDetails(userName, password);
-      // if the user is authenticated then get requests from the user and process them
-      if (customer != null) {
-        out.println("Log In Successful. What do you want to do?");
-        while (true) {
-          String request = in.readLine();
-          out.printf("Received request [%s] from %s\n", request, customer.getKey());
-
-          if (request.equals("QUIT")) {
-            return;
-          }
-
-          String response = bank.processRequest(customer, request);
-          out.println(response);
-        }
-      } else {
-        out.println("Log In Failed");
+      CustomerID customer;
+      while (true) {
+        customer = logIn();
+        if (customer == null) {
+          out.println("Log In Failed");
+        } else break;
       }
+      // The user is authenticated. Get requests from the user and process them.
+      out.println("Log In Successful. What do you want to do?");
+      handleRequests(customer);
     } catch (IOException e) {
       e.printStackTrace();
     } finally {
@@ -58,5 +41,29 @@ public class NewBankClientHandler extends Thread {
         Thread.currentThread().interrupt();
       }
     }
+  }
+
+  private void handleRequests(CustomerID customer) throws IOException {
+    // keep getting requests from the client and processing them
+    while (true) {
+      String request = in.readLine();
+      out.printf("Received request [%s] from %s\n", request, customer.getKey());
+      if (request.equals("QUIT")) return;
+
+      String response = bank.processRequest(customer, request);
+      out.println(response);
+    }
+  }
+
+  private CustomerID logIn() throws IOException {
+    // ask for username
+    out.println("Enter Username");
+    String userName = in.readLine();
+    // ask for password
+    out.println("Enter Password");
+    String password = in.readLine();
+    out.println("Checking Details...");
+    // authenticate user and get customer ID token from bank for use in subsequent requests
+    return bank.checkLogInDetails(userName, password);
   }
 }
