@@ -28,7 +28,13 @@ public class NewBankClientHandler extends Thread {
         } else break;
       }
       // The user is authenticated. Get requests from the user and process them.
-      out.println("Log In Successful. What do you want to do?");
+      out.println("Log In Successful");
+      out.println("You have the following options:");
+      out.println("OPTION 1. SHOWMYACCOUNTS — see your accounts and current balance");
+      out.println("OPTION 2. NEWACCOUNT <Name> - open a new account (COMING SOON)"); 
+      out.println("OPTION 3. MOVE <Amount> <From> <To> - move money from one account to another (COMING SOON)");
+      out.println("OPTION 4. PAY <Person/Company> <Ammount> - pay another person (COMING SOON)");
+      
       handleRequests(customer);
     } catch (IOException e) {
       e.printStackTrace();
