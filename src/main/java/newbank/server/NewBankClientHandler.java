@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.util.Scanner;
 
 import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
@@ -96,8 +97,11 @@ public class NewBankClientHandler extends Thread {
         case "NEWACCOUNT":
           handleNewAccount(tokens);
           break;
+        case "PAYSOMEONE":
+          handlePayAccount();
+          break;
         case "QUIT":
-          out.println("SUCESS: Good bye.");
+          out.println("SUCCESS: Good bye.");
           return false;
         default:
           out.println("FAIL: Unknown command.");
@@ -107,6 +111,20 @@ public class NewBankClientHandler extends Thread {
     }
 
     return true;
+  }
+
+  private void handlePayAccount() throws RequestNotAllowedException {
+    checkLoggedIn();
+    out.println(bank.showAccountsFor(customer));
+    out.println("Who would you like to pay?");
+    Scanner scannerObj = new Scanner(System.in);  // Create a Scanner object
+    System.out.println("Who would you like to pay?");
+
+    String payName = scannerObj.nextLine();  // Read user input
+    System.out.println("How much would you like to send: " + payName);  // Output user
+
+    String payAmount = scannerObj.nextLine();
+    System.out.println(bank.showAccountsFor(customer) + payAmount);
   }
 
   private void handleNewAccount(String[] tokens) throws RequestNotAllowedException {
