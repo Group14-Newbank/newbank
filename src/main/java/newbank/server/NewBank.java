@@ -1,6 +1,5 @@
 package newbank.server;
 
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Optional;
 
