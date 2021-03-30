@@ -97,7 +97,7 @@ public class NewBankClientHandler extends Thread {
           handleNewAccount(tokens);
           break;
         case "QUIT":
-          out.println("SUCESS: Good bye.");
+          out.println("SUCCESS: Good bye.");
           return false;
         default:
           out.println("FAIL: Unknown command.");
