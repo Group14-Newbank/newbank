@@ -21,6 +21,7 @@ public class Customer {
     StringBuilder s = new StringBuilder();
     for (Account a : accounts) {
       s.append(a.toString());
+      s.append("\n");
     }
     return s.toString();
   }
@@ -40,7 +41,7 @@ public class Customer {
   public String getPassword() {
     return password;
   }
-  
+
   @Override
   public String toString() {
 	  StringBuilder sb = new StringBuilder();
