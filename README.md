@@ -51,15 +51,13 @@ mvn package
 Run the server (from the command prompt)
 
 ```
-cd to target\classes
-java newbank.server.NewBankServer
+mvn exec:java@server
 ```
 
 Run the client (from another command prompt)
 
 ```
-cd to target\classes
-java newbank.client.ExampleClient
+mvn exec:java@client
 ```
 
 ## Pull Request Policy

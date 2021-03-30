@@ -3,6 +3,8 @@ package newbank.server;
 import java.util.HashMap;
 import java.util.Optional;
 
+import org.javamoney.moneta.Money;
+
 import newbank.server.exceptions.AccountNameInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
@@ -20,15 +22,15 @@ public class NewBank {
   private void addTestData() {
     try {
       Customer bhagy = new Customer("Bhagy", "bhagy");
-      bhagy.addAccount(new Account("Main", 1000.0));
+      bhagy.addAccount(new Account("Main", Money.of(1000, "GBP")));
       customers.put("Bhagy", bhagy);
 
       Customer christina = new Customer("Christina", "christina");
-      christina.addAccount(new Account("Savings", 1500.0));
+      christina.addAccount(new Account("Savings", Money.of(1500, "GBP")));
       customers.put("Christina", christina);
 
       Customer john = new Customer("John", "john");
-      john.addAccount(new Account("Checking", 250.0));
+      john.addAccount(new Account("Checking", Money.of(250, "GBP")));
       customers.put("John", john);
     } catch (CustomerMaxAccountsException e) {
       System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
@@ -120,7 +122,9 @@ public class NewBank {
 
   private String newAccount(final Customer customer, final String accountName) {
     try {
-      Account account = new Account(accountName, 0.0);
+      Money openingBalance = Money.of(0, "GBP");
+
+      Account account = new Account(accountName, openingBalance);
 
       customer.addAccount(account);
 

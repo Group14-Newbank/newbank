@@ -71,7 +71,7 @@ public class TestApp {
 
     String[] output = result.split(":");
     assertThat(output[0].trim(), equalTo("Main"));
-    assertThat(output[1].trim(), equalTo("1000.0"));
+    assertThat(output[1].trim(), equalTo("1000.00 GBP"));
   }
 
   @Test
