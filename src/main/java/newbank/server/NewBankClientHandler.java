@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-
-import newbank.server.exceptions.DuplicateCustomerException;
-import newbank.server.exceptions.PasswordInvalidException;
-import newbank.server.exceptions.RequestNotAllowedException;
+import java.util.HashMap;
+import java.util.Map;
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -16,65 +14,31 @@ public class NewBankClientHandler extends Thread {
   private NewBank bank;
   private BufferedReader in;
   private PrintWriter out;
-  private CustomerID customer;
+  private CustomerID customer = new CustomerID();
+  private Map<String, CommandSupplier> commands = new HashMap<>();
 
   public NewBankClientHandler(Socket s) throws IOException {
     bank = NewBank.getBank();
     in = new BufferedReader(new InputStreamReader(s.getInputStream()));
     out = new PrintWriter(s.getOutputStream(), true);
+
+    initialiseSupportedComamnds();
   }
 
-  private void handleLogin(String[] tokens) {
-    String username = "";
-    String password = "";
-
-    if (tokens.length >= 2) {
-      username = tokens[1];
-    }
-    if (tokens.length >= 3) {
-      password = tokens[2];
-    }
-
-    customer = bank.checkLogInDetails(username, password);
-
-    if (customer != null) {
-      out.println("SUCCESS: Log In Successful");
-    } else {
-      out.println("FAIL: Log In Failed");
-    }
+  // add supported commands here
+  private void initialiseSupportedComamnds() {
+    commands.put("LOGIN", (bank, tokens, customer) -> new LoginCommand(bank, tokens, customer));
+    commands.put(
+        "NEWACCOUNT", (bank, tokens, customer) -> new NewAccountCommand(bank, tokens, customer));
+    commands.put(
+        "REGISTER", (bank, tokens, customer) -> new RegisterCommand(bank, tokens, customer));
+    commands.put(
+        "SHOWMYACCOUNTS",
+        (bank, tokens, customer) -> new ShowAccountsCommand(bank, tokens, customer));
   }
 
-  private void handleRegisterCustomer(String[] tokens) {
-    String username = "";
-    String password = "";
-
-    if (tokens.length >= 2) {
-      username = tokens[1];
-    }
-    if (tokens.length >= 3) {
-      password = tokens[2];
-    }
-
-    try {
-      bank.addCustomer(username, password);
-
-      out.println("SUCCESS: Customer created successfully.");
-    } catch (DuplicateCustomerException ex) {
-      out.println("FAIL: " + String.format("Customer name [%s] already exists.", username));
-    } catch (PasswordInvalidException e) {
-      out.println("FAIL: Specified password does not meet the security requirements.");
-    }
-  }
-
-  private void handleShowAccounts() throws RequestNotAllowedException {
-    checkLoggedIn();
-    out.println(bank.showAccountsFor(customer));
-  }
-
-  private void checkLoggedIn() throws RequestNotAllowedException {
-    if (customer == null) {
-      throw new RequestNotAllowedException();
-    }
+  private Command getCommand(final String[] tokens) {
+    return commands.get(tokens[0].toUpperCase()).makeCommand(bank, tokens, customer);
   }
 
   private boolean processRequest(final String request) {
@@ -82,42 +46,14 @@ public class NewBankClientHandler extends Thread {
 
     assert (tokens.length > 0);
 
-    try {
-      switch (tokens[0].toUpperCase()) {
-        case "LOGIN":
-          handleLogin(tokens);
-          break;
-        case "REGISTER":
-          handleRegisterCustomer(tokens);
-          break;
-        case "SHOWMYACCOUNTS":
-          handleShowAccounts();
-          break;
-        case "NEWACCOUNT":
-          handleNewAccount(tokens);
-          break;
-        case "QUIT":
-          out.println("SUCCESS: Good bye.");
-          return false;
-        default:
-          out.println("FAIL: Unknown command.");
-      }
-    } catch (RequestNotAllowedException ex) {
-      out.println("FAIL: Customer not logged in.");
+    if (tokens[0].toUpperCase().equals("QUIT")) {
+      out.println("SUCCESS: Good bye.");
+      return false;
     }
+
+    out.println(getCommand(tokens).execute());
 
     return true;
-  }
-
-  private void handleNewAccount(String[] tokens) throws RequestNotAllowedException {
-    checkLoggedIn();
-
-    if (tokens.length != 2) {
-      out.println("FAIL: The proper syntax is: NEWACCOUNT <Name>");
-      return;
-    }
-
-    out.println(bank.newAccount(customer, tokens[1]));
   }
 
   public void run() {
