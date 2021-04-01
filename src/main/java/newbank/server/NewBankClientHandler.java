@@ -7,6 +7,16 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+
+import newbank.server.commands.Command;
+import newbank.server.commands.CommandSupplier;
+import newbank.server.commands.LoginCommand;
+import newbank.server.commands.NewAccountCommand;
+import newbank.server.commands.RegisterCommand;
+import newbank.server.commands.ShowAccountsCommand;
+import newbank.server.commands.UnknownCommand;
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -22,36 +32,41 @@ public class NewBankClientHandler extends Thread {
     in = new BufferedReader(new InputStreamReader(s.getInputStream()));
     out = new PrintWriter(s.getOutputStream(), true);
 
-    initialiseSupportedComamnds();
+    initialiseSupportedCommands();
   }
 
   // add supported commands here
-  private void initialiseSupportedComamnds() {
-    commands.put("LOGIN", (bank, tokens, customer) -> new LoginCommand(bank, tokens, customer));
-    commands.put(
-        "NEWACCOUNT", (bank, tokens, customer) -> new NewAccountCommand(bank, tokens, customer));
-    commands.put(
-        "REGISTER", (bank, tokens, customer) -> new RegisterCommand(bank, tokens, customer));
-    commands.put(
-        "SHOWMYACCOUNTS",
-        (bank, tokens, customer) -> new ShowAccountsCommand(bank, tokens, customer));
+  private void initialiseSupportedCommands() {
+    commands.put("LOGIN", LoginCommand::new);
+    commands.put("NEWACCOUNT", NewAccountCommand::new);
+    commands.put("REGISTER", RegisterCommand::new);
+    commands.put("SHOWMYACCOUNTS", ShowAccountsCommand::new);
+    commands.put("UNKNOWN", UnknownCommand::new);
   }
 
-  private Command getCommand(final String[] tokens) {
-    return commands.get(tokens[0].toUpperCase()).makeCommand(bank, tokens, customer);
+  private Command getCommand(final String name, final String[] tokens) {
+    Optional<Entry<String, CommandSupplier>> entry =
+        commands.entrySet().stream().filter(e -> e.getKey().equals(name)).findFirst();
+
+    if (entry.isPresent()) {
+      return commands.get(name).makeCommand(bank, tokens, customer);
+    } else {
+      return commands.get("UNKNOWN").makeCommand(bank, tokens, customer);
+    }
   }
 
   private boolean processRequest(final String request) {
-    final String[] tokens = request.split("\\s+");
+    final String[] tokens = request.trim().split("\\s+");
 
     assert (tokens.length > 0);
 
-    if (tokens[0].toUpperCase().equals("QUIT")) {
-      out.println("SUCCESS: Good bye.");
+    final String commandName = tokens[0].toUpperCase();
+
+    out.println(getCommand(commandName, tokens).execute());
+
+    if (commandName.equals("QUIT")) {
       return false;
     }
-
-    out.println(getCommand(tokens).execute());
 
     return true;
   }

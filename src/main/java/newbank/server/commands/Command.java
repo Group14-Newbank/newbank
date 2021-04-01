@@ -1,5 +1,6 @@
-package newbank.server;
+package newbank.server.commands;
 
+import newbank.server.CustomerID;
 import newbank.server.exceptions.RequestNotAllowedException;
 
 /** Abstract representation of a command. */

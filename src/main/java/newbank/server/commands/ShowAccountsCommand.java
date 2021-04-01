@@ -1,5 +1,7 @@
-package newbank.server;
+package newbank.server.commands;
 
+import newbank.server.CustomerID;
+import newbank.server.NewBank;
 import newbank.server.exceptions.RequestNotAllowedException;
 
 public class ShowAccountsCommand extends Command {

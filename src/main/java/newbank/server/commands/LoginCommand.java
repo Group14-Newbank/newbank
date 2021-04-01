@@ -1,4 +1,7 @@
-package newbank.server;
+package newbank.server.commands;
+
+import newbank.server.CustomerID;
+import newbank.server.NewBank;
 
 public class LoginCommand extends Command {
   private final NewBank bank;
