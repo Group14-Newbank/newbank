@@ -4,6 +4,7 @@ import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
+import newbank.server.exceptions.UsernameInvalidException;
 
 public class RegisterCommand extends Command {
   private final NewBank bank;
@@ -34,6 +35,8 @@ public class RegisterCommand extends Command {
       return "FAIL: " + String.format("Customer name [%s] already exists.", username);
     } catch (PasswordInvalidException e) {
       return "FAIL: Specified password does not meet the security requirements.";
+    } catch (UsernameInvalidException e){
+      return "FAIL: Invalid username. Username must start with a letter and contain only letters and digits.";
     }
   }
 }

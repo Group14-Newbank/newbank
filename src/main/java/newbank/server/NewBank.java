@@ -9,6 +9,7 @@ import newbank.server.exceptions.AccountNameInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
+import newbank.server.exceptions.UsernameInvalidException;
 
 public class NewBank {
   private static final NewBank bank = new NewBank();
@@ -41,6 +42,23 @@ public class NewBank {
     }
   }
 
+  // simple algorithm to validate user name:
+  // must start with a letter and only contain letters and digits
+  // we allow UNICODE letters
+  private void validateUsername(final String username) throws UsernameInvalidException {
+    if (!username.matches("^\\p{L}(?:\\p{L}|\\p{N})+")) {
+      throw new UsernameInvalidException();
+    }
+  }
+
+  // Simple algorithm to check that the password meets the security requirements
+  // must be non-empty
+  private void validatePassword(final String password) throws PasswordInvalidException {
+    if (password.isEmpty()) {
+      throw new PasswordInvalidException();
+    }
+  }
+
   /**
    * Add a new customer to the bank with the supplied credentials.
    *
@@ -48,21 +66,15 @@ public class NewBank {
    * @param password The customer's password
    */
   public void addCustomer(final String username, final String password)
-      throws DuplicateCustomerException, PasswordInvalidException {
+      throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
     if (customers.containsKey(username)) {
       throw new DuplicateCustomerException();
     }
 
+    validateUsername(username);
     validatePassword(password);
 
     customers.put(username, new Customer(username, password));
-  }
-
-  // Simple algorithm to check that the password meets the security requirements
-  private void validatePassword(final String password) throws PasswordInvalidException {
-    if (password.isEmpty()) {
-      throw new PasswordInvalidException();
-    }
   }
 
   public static NewBank getBank() {
