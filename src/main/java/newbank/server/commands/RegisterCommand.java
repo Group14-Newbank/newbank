@@ -9,14 +9,20 @@ import newbank.server.exceptions.UsernameInvalidException;
 public class RegisterCommand extends Command {
   private final NewBank bank;
   private final String[] tokens;
+  private final CustomerID customer;
 
   public RegisterCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
     this.bank = bank;
     this.tokens = tokens;
+    this.customer = customer;
   }
 
   @Override
   public String execute() {
+    if (isLoggedIn(customer)) {
+      return "FAIL: Request not allowed, please log out first.";
+    }
+
     String username = "";
     String password = "";
 
@@ -35,8 +41,10 @@ public class RegisterCommand extends Command {
       return "FAIL: " + String.format("Customer name [%s] already exists.", username);
     } catch (PasswordInvalidException e) {
       return "FAIL: Specified password does not meet the security requirements.";
-    } catch (UsernameInvalidException e){
-      return "FAIL: Invalid username. Username must start with a letter and contain only letters and digits.";
+    } catch (UsernameInvalidException e) {
+      return String.format(
+          "FAIL: Username [%s] invalid. Username must start with a letter and contain only letters and digits.",
+          username);
     }
   }
 }

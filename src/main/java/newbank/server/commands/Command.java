@@ -8,8 +8,12 @@ public abstract class Command {
   public abstract String execute();
 
   protected void checkLoggedIn(CustomerID customer) throws RequestNotAllowedException {
-    if (customer.getKey().isEmpty()) {
+    if (!isLoggedIn(customer)) {
       throw new RequestNotAllowedException();
     }
+  }
+  
+  protected boolean isLoggedIn(CustomerID customer) {
+	  return !customer.getKey().isEmpty();
   }
 }

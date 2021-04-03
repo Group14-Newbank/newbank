@@ -46,7 +46,7 @@ public class NewBank {
   // must start with a letter and only contain letters and digits
   // we allow UNICODE letters
   private void validateUsername(final String username) throws UsernameInvalidException {
-    if (!username.matches("^\\p{L}(?:\\p{L}|\\p{N})+")) {
+    if (!username.matches("\\p{L}(?:\\p{L}|\\p{N})+")) {
       throw new UsernameInvalidException();
     }
   }
