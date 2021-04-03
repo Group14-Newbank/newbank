@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.javamoney.moneta.Money;
 
+import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountNameInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
@@ -107,10 +108,6 @@ public class NewBank {
   public synchronized String showAccountsFor(final CustomerID customerID) {
     Customer customer = customers.get(customerID.getKey());
 
-    return showAccountsFor(customer);
-  }
-
-  private String showAccountsFor(final Customer customer) {
     return customer.accountsToString();
   }
 
@@ -124,16 +121,12 @@ public class NewBank {
    * Create a new account for a given customer
    *
    * @param customerID The customer identifier
-   * @param accountName the account name
-   * @return a success indicator if the operation was successful, otherwise an error message
+   * @param accountName The account name
+   * @return A success indicator if the operation was successful, otherwise an error message
    */
   public synchronized String newAccount(final CustomerID customerID, final String accountName) {
     Customer customer = customers.get(customerID.getKey());
 
-    return newAccount(customer, accountName);
-  }
-
-  private String newAccount(final Customer customer, final String accountName) {
     try {
       Money openingBalance = Money.of(0, "GBP");
 
@@ -162,5 +155,30 @@ public class NewBank {
         .filter(e -> e.getValue().getUsername().equals(customerName))
         .findFirst()
         .map(e -> e.getValue());
+  }
+
+  private Optional<Account> getAccount(final Customer customer, final String accountName) {
+    return customer.getAccount(accountName);
+  }
+
+  /**
+   * Deposit some money into a specified customer's account
+   *
+   * @param customerID The customer identifier
+   * @param account The account name
+   * @param money The amount to deposit
+   */
+  public synchronized void depositMoney(
+      final CustomerID customerID, final String accountName, final Money money)
+      throws AccountInvalidException {
+
+    Customer customer = customers.get(customerID.getKey());
+    Optional<Account> account = getAccount(customer, accountName);
+
+    if (account.isEmpty()) {
+      throw new AccountInvalidException();
+    }
+
+    account.get().addMoney(money);
   }
 }

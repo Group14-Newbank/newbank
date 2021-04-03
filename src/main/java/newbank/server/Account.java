@@ -18,7 +18,8 @@ public class Account {
     this.balance = openingBalance;
   }
 
-  private void validate(String accountName, Money openingBalance) throws AccountNameInvalidException {
+  private void validate(String accountName, Money openingBalance)
+      throws AccountNameInvalidException {
     if (accountName.length() < MIN_NAME_LENGTH || accountName.length() > MAX_NAME_LENGTH) {
       throw new AccountNameInvalidException(
           "Length must be between " + MIN_NAME_LENGTH + " and " + MAX_NAME_LENGTH + " characters.");
@@ -30,6 +31,19 @@ public class Account {
   }
 
   public String toString() {
-    return String.format("%s: %.2f %s", accountName, balance.getNumberStripped(), balance.getCurrency());
+    return String.format(
+        "%s: %.2f %s", accountName, balance.getNumberStripped(), balance.getCurrency());
+  }
+
+  public String getName() {
+    return accountName;
+  }
+
+  public Money getBalance() {
+    return balance;
+  }
+
+  public void addMoney(Money amount) {
+    balance = balance.add(Money.of(amount.getNumber(), "GBP"));
   }
 }

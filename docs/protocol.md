@@ -59,7 +59,7 @@
     <td><strong>Comments</strong></td>
     <td colspan="2">
       <ul>
-         <li>Customer must be logged in in order to use this command</li>
+         <li>Customers must be logged in in order to use this command</li>
          <li>Accounts labels for a customer must be unique</li>
       </ul>
     </td>
@@ -136,7 +136,7 @@
     <td><strong>Comments</strong></td>
     <td colspan="2">
       <ul>
-         <li>Customer must be logged in in order to use this command</li>
+         <li>Customers must be logged in in order to use this command</li>
       </ul>
     </td>
   </tr>
@@ -153,5 +153,51 @@
   <tr>
     <td><strong>Example</strong></td>
     <td colspan="2"><code>$ SHOWMYACCOUNTS</code><br /><code>SUCCESS Savings 1000.0</code></td>
+  </tr>
+</table>
+
+<h3>DEPOSIT</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Add money into one of the customer's own accounts.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>DEPOSIT account_name amount</code></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>account_name</em></td>
+    <td><em>The account name</em></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>amount</td>
+    <td>The amount to deposit</td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+      <ul>
+         <li>Customers must be logged in in order to use this command</li>
+         <li>By default the currency used is GBP.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS</td>
+    <td>If the transaction completed successfully.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>FAIL <em>message</em></td>
+    <td>If the transaction failed, <em>message</em> provides the error message</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ DEPOSIT Savings 200.0</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>
