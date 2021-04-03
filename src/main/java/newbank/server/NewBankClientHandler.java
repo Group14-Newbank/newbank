@@ -10,6 +10,7 @@ import java.util.Map;
 
 import newbank.server.commands.Command;
 import newbank.server.commands.CommandSupplier;
+import newbank.server.commands.DepositCommand;
 import newbank.server.commands.LoginCommand;
 import newbank.server.commands.NewAccountCommand;
 import newbank.server.commands.RegisterCommand;
@@ -35,6 +36,7 @@ public class NewBankClientHandler extends Thread {
 
   // add supported commands here
   private void initialiseSupportedCommands() {
+    commands.put("DEPOSIT", DepositCommand::new);
     commands.put("LOGIN", LoginCommand::new);
     commands.put("NEWACCOUNT", NewAccountCommand::new);
     commands.put("REGISTER", RegisterCommand::new);

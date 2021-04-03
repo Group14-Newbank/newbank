@@ -6,6 +6,13 @@ import newbank.server.exceptions.RequestNotAllowedException;
 /** Abstract representation of a command. */
 public abstract class Command {
   public abstract String execute();
+  
+  /**
+   * @return the command syntax
+   */
+  protected String getSyntax() {
+	  return "";
+  }
 
   protected void checkLoggedIn(CustomerID customer) throws RequestNotAllowedException {
     if (!isLoggedIn(customer)) {

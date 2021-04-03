@@ -1,6 +1,7 @@
 package newbank.server;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import newbank.server.exceptions.CustomerMaxAccountsException;
 
@@ -42,14 +43,18 @@ public class Customer {
     return password;
   }
 
+  public Optional<Account> getAccount(final String accountName) {
+    return accounts.stream().filter(a -> a.getName().equalsIgnoreCase(accountName)).findFirst();
+  }
+
   @Override
   public String toString() {
-	  StringBuilder sb = new StringBuilder();
-	  sb.append(this.getClass().getName() + "[");
-	  sb.append("username=" + username + ", ");
-	  sb.append("password=" + password + ", ");
-	  sb.append("accounts=" + this.accountsToString());
-	  sb.append("]");
-	  return sb.toString();
+    StringBuilder sb = new StringBuilder();
+    sb.append(this.getClass().getName() + "[");
+    sb.append("username=" + username + ", ");
+    sb.append("password=" + password + ", ");
+    sb.append("accounts=" + this.accountsToString());
+    sb.append("]");
+    return sb.toString();
   }
 }
