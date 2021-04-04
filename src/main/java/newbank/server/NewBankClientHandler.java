@@ -7,8 +7,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
 
 import newbank.server.commands.Command;
 import newbank.server.commands.CommandSupplier;
@@ -45,14 +43,7 @@ public class NewBankClientHandler extends Thread {
   }
 
   private Command getCommand(final String name, final String[] tokens) {
-    Optional<Entry<String, CommandSupplier>> entry =
-        commands.entrySet().stream().filter(e -> e.getKey().equals(name)).findFirst();
-
-    if (entry.isPresent()) {
-      return commands.get(name).makeCommand(bank, tokens, customer);
-    } else {
-      return commands.get("UNKNOWN").makeCommand(bank, tokens, customer);
-    }
+	return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
   }
 
   private boolean processRequest(final String request) {
