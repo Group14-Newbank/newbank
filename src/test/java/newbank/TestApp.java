@@ -3,6 +3,8 @@ package newbank;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
 
 import java.io.IOException;
 import java.io.PipedReader;
@@ -67,15 +69,22 @@ public class TestApp {
   }
 
   @Test
+  public void cannotSendCommandsIfLoggedOut() throws IOException {
+    writer.write("SHOWMYACCOUNTS\n");
+    assertThat(display.getLine(), not(matchesPattern("request")));
+  }
+
+  @Test
   public void canDisplayBalance() throws IOException {
     String response = logIn("Bhagy", "bhagy");
     assertThat(response, containsString("Successful"));
 
-    String result = testCommand("SHOWMYACCOUNTS\n");
+    String accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(accountSummary, matchesPattern("Main:\\s+1000.00\\s+GBP"));
 
-    String[] output = result.split(":");
-    assertThat(output[0].trim(), equalTo("Main"));
-    assertThat(output[1].trim(), equalTo("1000.00 GBP"));
+    accountSummary = display.getLine();
+    assertThat(accountSummary, matchesPattern("Savings:\\s+201.19\\s+GBP"));
+    assertThat( display.getLine(), equalTo(""));
   }
 
   @Test

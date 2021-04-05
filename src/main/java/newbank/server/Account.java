@@ -6,7 +6,7 @@ import newbank.server.exceptions.AccountNameInvalidException;
 
 public class Account {
   private String accountName;
-  private Money openingBalance;
+  private Money balance;
 
   public static final int MIN_NAME_LENGTH = 4;
   public static final int MAX_NAME_LENGTH = 12;
@@ -15,7 +15,7 @@ public class Account {
     this.validate(accountName, openingBalance);
 
     this.accountName = accountName;
-    this.openingBalance = openingBalance;
+    this.balance = openingBalance;
   }
 
   private void validate(String accountName, Money openingBalance) throws AccountNameInvalidException {
@@ -30,6 +30,6 @@ public class Account {
   }
 
   public String toString() {
-    return String.format("%s: %.2f %s", accountName, openingBalance.getNumberStripped(), openingBalance.getCurrency());
+    return String.format("%s: %.2f %s", accountName, balance.getNumberStripped(), balance.getCurrency());
   }
 }
