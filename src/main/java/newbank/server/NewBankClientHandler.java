@@ -21,19 +21,18 @@ public class NewBankClientHandler extends Thread {
   public void run() {
     try {
       CustomerID customer;
+      clearConsole();
+      launchHeader();
+
       while (true) {
         customer = logIn();
         if (customer == null) {
           out.println("Log In Failed");
         } else break;
       }
+
       // The user is authenticated. Get requests from the user and process them.
-      out.println("Log In Successful");
-      out.println("You have the following options:");
-      out.println("OPTION 1. SHOWMYACCOUNTS — see your accounts and current balance");
-      out.println("OPTION 2. NEWACCOUNT <Name> - open a new account (COMING SOON)"); 
-      out.println("OPTION 3. MOVE <Amount> <From> <To> - move money from one account to another (COMING SOON)");
-      out.println("OPTION 4. PAY <Person/Company> <Ammount> - pay another person (COMING SOON)");
+      mainMenu();
       
       handleRequests(customer);
     } catch (IOException e) {
@@ -72,4 +71,26 @@ public class NewBankClientHandler extends Thread {
     // authenticate user and get customer ID token from bank for use in subsequent requests
     return bank.checkLogInDetails(userName, password);
   }
+
+  private void clearConsole() {
+    out.println("\033[H\033[2J");
+  }
+
+  private void launchHeader() {
+    out.println("--------------------------------------------");
+    out.println("Welcome to New Bank Terminal. Please log in.");
+    out.println("--------------------------------------------");
+  }
+
+  private void mainMenu() {
+    clearConsole();
+    out.println("Log In Successful");
+    out.println("You have the following options:");
+    out.println("OPTION 1. SHOWMYACCOUNTS — see your accounts and current balance");
+    out.println("OPTION 2. NEWACCOUNT <Name> - open a new account (COMING SOON)"); 
+    out.println("OPTION 3. MOVE <Amount> <From> <To> - move money from one account to another (COMING SOON)");
+    out.println("OPTION 4. PAY <Person/Company> <Ammount> - pay another person (COMING SOON)");
+    out.println("OPTION 5. QUIT - quit the menu"
+  }
+
 }
