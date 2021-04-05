@@ -142,7 +142,7 @@
   </tr>
   <tr>
     <td><strong>Returns</strong></td>
-    <td>SUCCESS <em>info</em</td>
+    <td>SUCCESS <em>info</em></td>
     <td>If the transaction completed successfully, <em>info</em> contains the accounts' information</td>
   </tr>
   <tr>
