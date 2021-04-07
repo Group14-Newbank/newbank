@@ -48,7 +48,9 @@ public class ExampleClient extends Thread {
                 e.printStackTrace();
                 Thread.currentThread().interrupt();
               }
-              if (response == null) break; // socket broken, end thread
+              if (response == null) {
+                break; // socket broken, end thread
+              }
 
               display.writeLine(response);
             }
@@ -63,6 +65,7 @@ public class ExampleClient extends Thread {
 
   /**
    * Tries to open a socket, but does some error-diagnosis if that fails
+   *
    * @param ip an ip address, or the loopback address
    * @param port the port that the newbank server will be listening on
    * @return a socket connected to the newbank server
@@ -73,9 +76,10 @@ public class ExampleClient extends Thread {
     try {
       return new Socket(ip, port);
     } catch (UnknownHostException | SocketException | IllegalArgumentException e) {
-      throw new ConfigurationException(String.format(
-          "The newbank server cannot be reached at ip %s, port number %d.", DEFAULT_IP, DEFAULT_PORT
-      ));
+      throw new ConfigurationException(
+          String.format(
+              "The newbank server cannot be reached at ip %s, port number %d.",
+              DEFAULT_IP, DEFAULT_PORT));
     }
   }
 
@@ -84,6 +88,10 @@ public class ExampleClient extends Thread {
       String command;
       while ((command = userInput.readLine()) != null) {
         bankServerOut.println(command);
+
+        if (command.equals("QUIT")) {
+          break; // terminate application
+        }
       }
     } catch (IOException e) {
       e.printStackTrace();

@@ -201,3 +201,30 @@
     <td colspan="2"><code>$ DEPOSIT Savings 200.0</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>
+
+<h3>QUIT</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Exit application.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>QUIT</code></td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS <em>info</em></td>
+    <td>If the transaction completed successfully, <em>info</em> contains the accounts' information</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ QUIT</code><br /><code>SUCCESS Good bye.</code></td>
+  </tr>
+</table>

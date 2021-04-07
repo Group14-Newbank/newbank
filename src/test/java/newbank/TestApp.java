@@ -195,4 +195,11 @@ public class TestApp {
     response = testCommand("DEPOSIT Savings -500.0\n");
     assertThat(response, containsString("FAIL"));
   }
+
+  @Test
+  public void canExitApplication() throws IOException, InterruptedException {
+    String response = testCommand("QUIT\n");
+    assertThat(response, containsString("SUCCESS"));
+    client.join();
+  }
 }
