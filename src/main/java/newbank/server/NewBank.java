@@ -165,7 +165,7 @@ public class NewBank {
    * Deposit some money into a specified customer's account
    *
    * @param customerID The customer identifier
-   * @param account The account name
+   * @param accountName The account name
    * @param money The amount to deposit
    */
   public synchronized void depositMoney(
