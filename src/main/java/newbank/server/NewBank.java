@@ -175,10 +175,6 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
     Optional<Account> account = getAccount(customer, accountName);
 
-    if (account.isEmpty()) {
-      throw new AccountInvalidException();
-    }
-
-    account.get().addMoney(money);
+    account.orElseThrow(AccountInvalidException::new).addMoney(money);
   }
 }
