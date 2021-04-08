@@ -165,7 +165,7 @@ public class NewBank {
    * Deposit some money into a specified customer's account
    *
    * @param customerID The customer identifier
-   * @param account The account name
+   * @param accountName The account name
    * @param money The amount to deposit
    */
   public synchronized void depositMoney(
@@ -175,10 +175,6 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
     Optional<Account> account = getAccount(customer, accountName);
 
-    if (account.isEmpty()) {
-      throw new AccountInvalidException();
-    }
-
-    account.get().addMoney(money);
+    account.orElseThrow(AccountInvalidException::new).addMoney(money);
   }
 }
