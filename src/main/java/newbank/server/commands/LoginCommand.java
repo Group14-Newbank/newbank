@@ -3,38 +3,36 @@ package newbank.server.commands;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 public class LoginCommand extends Command {
-  private final NewBank bank;
-  private final String[] tokens;
-  private final CustomerID customer;
 
   public LoginCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.bank = bank;
-    this.tokens = tokens;
-    this.customer = customer;
+    super(bank, tokens, customer);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::incorrectUsage);
   }
 
   @Override
   public String execute() {
-    String username = "";
-    String password = "";
+    Optional<String> message = applyResponsibilityChain();
+    if (message.isPresent()) return message.get();
 
-    if (tokens.length >= 2) {
-      username = tokens[1];
-    }
-    if (tokens.length >= 3) {
-      password = tokens[2];
-    }
-
+    String username = tokens[1];
+    String password = tokens[2];
     CustomerID tempCustomer = bank.checkLogInDetails(username, password);
 
-    if (tempCustomer != null) {
-      // store customerID
-      customer.setKey(tempCustomer.getKey());
+    if (tempCustomer == null) return "FAIL: Log In Failed";
 
-      return "SUCCESS: Log In Successful";
-    } else {
-      return "FAIL: Log In Failed";
-    }
+    // store customerID
+    customerID.setKey(tempCustomer.getKey());
+    return "SUCCESS: Log In Successful";
+  }
+  
+  @Override
+  protected String getSyntax() {
+    return "LOGIN <username> <password>";
   }
 }

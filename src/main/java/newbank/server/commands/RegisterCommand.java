@@ -6,33 +6,31 @@ import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
 
+import java.util.ArrayList;
+import java.util.Optional;
+
 public class RegisterCommand extends Command {
-  private final NewBank bank;
-  private final String[] tokens;
-  private final CustomerID customer;
 
   public RegisterCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.bank = bank;
-    this.tokens = tokens;
-    this.customer = customer;
+    super(bank, tokens, customer);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::incorrectUsage);
+    responsibilityChain.add(this::mustLogOut);
+  }
+
+  @Override
+  protected String getSyntax() {
+    return "REGISTER <username> <password>";
   }
 
   @Override
   public String execute() {
-    if (isLoggedIn(customer)) {
-      return "FAIL: Request not allowed, please log out first.";
-    }
+    Optional<String> message = applyResponsibilityChain();
+    if (message.isPresent()) return message.get();
 
-    String username = "";
-    String password = "";
-
-    if (tokens.length >= 2) {
-      username = tokens[1];
-    }
-    if (tokens.length >= 3) {
-      password = tokens[2];
-    }
-
+    String username = tokens[1];
+    String password = tokens[2];
     try {
       bank.addCustomer(username, password);
 
@@ -46,5 +44,11 @@ public class RegisterCommand extends Command {
           "FAIL: Username [%s] invalid. Username must start with a letter and contain only letters and digits.",
           username);
     }
+  }
+
+  private Optional<String> mustLogOut() {
+    if (isLoggedIn())
+      return Optional.of("FAIL: Request not allowed, please log out first.");
+    return Optional.empty();
   }
 }
