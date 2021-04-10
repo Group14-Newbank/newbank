@@ -19,7 +19,6 @@ public class Account {
 
   public static final int MIN_NAME_LENGTH = 4;
   public static final int MAX_NAME_LENGTH = 12;
-  public static final String DEFAULT_CURRENCY = "GBP";
 
   public Account(final String accountName, final Money openingBalance)
       throws AccountBalanceInvalidException, AccountNameInvalidException {

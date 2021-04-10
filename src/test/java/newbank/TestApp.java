@@ -1,5 +1,6 @@
 package newbank;
 
+import static newbank.utils.Config.DEFAULT_PORT;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -41,7 +42,7 @@ public class TestApp {
 
   @BeforeClass
   public static void beforeAll() throws IOException, InterruptedException {
-    server = new NewBankServer(NewBankServer.DEFAULT_SERVER_PORT);
+    server = new NewBankServer(DEFAULT_PORT);
     NewBankServer.VERBOSE_MODE = true;
     server.start();
   }
@@ -52,7 +53,7 @@ public class TestApp {
     writer = new PipedWriter(reader);
     display = new QueueDisplay();
 
-    client = new TestClient("localhost", NewBankServer.DEFAULT_SERVER_PORT, reader);
+    client = new TestClient("localhost", DEFAULT_PORT, reader);
     client.setDisplay(display);
     client.start();
   }

@@ -4,13 +4,14 @@ import java.math.BigDecimal;
 
 import org.javamoney.moneta.Money;
 
-import newbank.server.Account;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountBalanceInsufficientException;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.CommandInvalidSyntaxException;
 import newbank.server.exceptions.RequestNotAllowedException;
+
+import static newbank.utils.Config.DEFAULT_CURRENCY;
 
 public class MoveMoneyCommand extends Command {
   private final NewBank bank;
@@ -55,7 +56,7 @@ public class MoveMoneyCommand extends Command {
       }
 
       bank.moveMoney(
-          customer, accountNameFrom, accountNameTo, Money.of(amount, Account.DEFAULT_CURRENCY));
+          customer, accountNameFrom, accountNameTo, Money.of(amount, DEFAULT_CURRENCY));
 
       return String.format(
           "SUCCESS: Money transferred from [%s] to [%s] successfully.",
