@@ -12,10 +12,11 @@ import java.net.UnknownHostException;
 import newbank.utils.ConsoleDisplay;
 import newbank.utils.Display;
 
+import static newbank.Configuration.DEFAULT_IP;
+import static newbank.Configuration.DEFAULT_PORT;
+
 public class ExampleClient extends Thread {
 
-  public static final int DEFAULT_PORT = 14002;
-  public static final String DEFAULT_IP = "localhost";
   private final Socket server;
   private final PrintWriter bankServerOut;
   private final BufferedReader userInput;

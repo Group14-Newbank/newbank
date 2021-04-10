@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import static newbank.Configuration.DEFAULT_PORT;
+
 public class NewBankServer extends Thread {
-  public static final int DEFAULT_SERVER_PORT = 14002;
   private ServerSocket server;
 
   public NewBankServer(int port) throws IOException {
@@ -35,6 +36,6 @@ public class NewBankServer extends Thread {
 
   public static void main(String[] args) throws IOException {
     // starts a new NewBankServer thread on a specified port number
-    new NewBankServer(DEFAULT_SERVER_PORT).start();
+    new NewBankServer(DEFAULT_PORT).start();
   }
 }

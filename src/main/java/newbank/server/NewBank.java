@@ -16,6 +16,9 @@ import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
 
+import static newbank.Configuration.DEFAULT_CURRENCY;
+import static newbank.Configuration.MAX_ACCOUNTS;
+
 public class NewBank {
   private static final NewBank bank = new NewBank();
   private final HashMap<String, Customer> customers;
@@ -46,7 +49,7 @@ public class NewBank {
 
       customers.put("John", john);
     } catch (CustomerMaxAccountsException e) {
-      System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
+      System.err.println("FAIL: Maximum number of accounts is: " + MAX_ACCOUNTS);
       System.exit(1);
     } catch (AccountNameInvalidException e) {
       System.err.println("FAIL: Invalid account name: " + e.getMessage());
@@ -150,7 +153,7 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
 
     try {
-      customer.addAccount(new Account(accountName, Money.of(0, "GBP")));
+      customer.addAccount(new Account(accountName, Money.of(0, DEFAULT_CURRENCY)));
 
       if (isDefault) {
         customer.setDefaultAccount(accountName);
@@ -158,7 +161,7 @@ public class NewBank {
 
       return "SUCCESS: The account has been created successfully.";
     } catch (CustomerMaxAccountsException e) {
-      return "FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS;
+      return "FAIL: Maximum number of accounts is: " + MAX_ACCOUNTS;
     } catch (AccountNameInvalidException e) {
       return "FAIL: Invalid account name: " + e.getMessage();
     } catch (AccountBalanceInvalidException e) {

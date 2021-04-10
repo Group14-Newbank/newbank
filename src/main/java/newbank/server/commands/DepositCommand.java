@@ -7,6 +7,8 @@ import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.RequestNotAllowedException;
 
+import static newbank.Configuration.DEFAULT_CURRENCY;
+
 public class DepositCommand extends Command {
   private final NewBank bank;
   private final String[] tokens;
