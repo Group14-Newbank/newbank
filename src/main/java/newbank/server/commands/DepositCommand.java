@@ -2,12 +2,13 @@ package newbank.server.commands;
 
 import org.javamoney.moneta.Money;
 
-import newbank.server.Account;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.CommandInvalidSyntaxException;
 import newbank.server.exceptions.RequestNotAllowedException;
+
+import static newbank.utils.Config.DEFAULT_CURRENCY;
 
 public class DepositCommand extends Command {
   private final NewBank bank;
@@ -45,7 +46,7 @@ public class DepositCommand extends Command {
         return String.format("FAIL: Deposit amount [%s] invalid.", tokens[2]);
       }
 
-      bank.depositMoney(customer, accountName, Money.of(amount, Account.DEFAULT_CURRENCY));
+      bank.depositMoney(customer, accountName, Money.of(amount, DEFAULT_CURRENCY));
 
       return "SUCCESS: Account credited successfully.";
     } catch (NumberFormatException ex) {

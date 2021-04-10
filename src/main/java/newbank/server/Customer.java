@@ -8,13 +8,13 @@ import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.utils.Config;
 
+import static newbank.utils.Config.MAX_ACCOUNTS;
+
 public class Customer {
   private String username;
   private String password;
   private final ArrayList<Account> accounts;
   private Optional<Account> defaultAccount;
-
-  public static final int MAX_ACCOUNTS = 5;
 
   public Customer(final String username, final String password) {
     this.username = username;
