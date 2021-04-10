@@ -3,12 +3,15 @@ package newbank.server;
 import java.util.ArrayList;
 import java.util.Optional;
 
+import newbank.server.exceptions.AccountInvalidException;
+import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 
 public class Customer {
   private String username;
   private String password;
   private final ArrayList<Account> accounts;
+  private Optional<Account> defaultAccount;
 
   public static final int MAX_ACCOUNTS = 5;
 
@@ -16,11 +19,16 @@ public class Customer {
     this.username = username;
     this.password = password;
     accounts = new ArrayList<>();
+    defaultAccount = Optional.empty();
   }
 
   public String accountsToString() {
     StringBuilder s = new StringBuilder();
     for (Account a : accounts) {
+      if(defaultAccount.isPresent() && a == defaultAccount.get()) {
+    	  s.append('*');
+      }
+      
       s.append(a.toString());
       s.append("\n");
     }
@@ -45,6 +53,46 @@ public class Customer {
 
   public Optional<Account> getAccount(final String accountName) {
     return accounts.stream().filter(a -> a.getName().equalsIgnoreCase(accountName)).findFirst();
+  }
+
+  /**
+   * Set the customer's default current account.
+   *
+   * @param accountName The account name
+   * @throws AccountInvalidException if the account does not exist.
+ * @throws AccountTypeInvalidException 
+   */
+  public void setDefaultAccount(final String accountName) throws AccountInvalidException, AccountTypeInvalidException {
+    Optional<Account> newDefault =
+        accounts.stream().filter(e -> e.getName().equalsIgnoreCase(accountName)).findFirst();
+
+    Account acc = newDefault.orElseThrow(AccountInvalidException::new);
+
+    if (Account.isSavingsAccount(accountName)) {
+      throw new AccountTypeInvalidException();
+    }
+
+    // update default account
+    defaultAccount = Optional.of(acc);
+  }
+
+  /**
+   * Determine if the account supplied is the customer's default current account.
+   *
+   * @param accountName The account name
+   * @return true if the account is the default current account, false otherwise.
+   */
+  public boolean isDefaultAccount(final String accountName) {
+    if (defaultAccount.isPresent()) {
+      return defaultAccount.get().getName().equalsIgnoreCase(accountName);
+    }
+
+    return false;
+  }
+
+  /** @return true if the customer has a default current account, false otherwise. */
+  public boolean hasDefaultAccount() {
+    return defaultAccount.isPresent();
   }
 
   @Override

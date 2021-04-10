@@ -101,7 +101,7 @@ public class TestApp {
     assertThat(response, containsString("SUCCESS"));
 
     response = testCommand("NEWACCOUNT\n");
-    assertThat(response, equalTo("FAIL: The proper syntax is: NEWACCOUNT <Name>"));
+    assertThat(response, equalTo("FAIL: Usage: NEWACCOUNT <Name> [Default]"));
 
     response = testCommand("NEWACCOUNT abc\n");
     assertThat(
@@ -157,10 +157,11 @@ public class TestApp {
     assertThat(response, containsString("SUCCESS"));
   }
 
-  private void setupCustomerWithAccount() throws IOException {
-    addCustomer("TestCustomer2", "password2");
+  private void setupCustomerWithAccount(final String username, final String password)
+      throws IOException {
+    addCustomer(username, password);
 
-    String response = logIn("TestCustomer2", "password2");
+    String response = logIn(username, password);
     assertThat(response, containsString("SUCCESS"));
 
     response = testCommand("NEWACCOUNT Savings\n");
@@ -169,7 +170,7 @@ public class TestApp {
 
   @Test
   public void canDepositMoney() throws IOException {
-    setupCustomerWithAccount();
+    setupCustomerWithAccount("TestCustomer2", "password2");
 
     String response = testCommand("DEPOSIT Savings 1000.0\n");
     assertThat(response, containsString("SUCCESS"));
@@ -184,15 +185,12 @@ public class TestApp {
 
   @Test
   public void canHandleInvalidDepositAccountOrAmount() throws IOException {
-    addCustomer("TestCustomer3", "password3");
+    setupCustomerWithAccount("TestCustomer3", "password3");
 
-    String response = logIn("TestCustomer3", "password3");
-    assertThat(response, containsString("SUCCESS"));
-
-    response = testCommand("DEPOSIT Savings 1000.0\n");
+    String response = testCommand("DEPOSIT Main 1000.0\n");
     assertThat(response, containsString("FAIL"));
 
-    response = testCommand("DEPOSIT Savings -500.0\n");
+    response = testCommand("DEPOSIT Main -500.0\n");
     assertThat(response, containsString("FAIL"));
   }
 
@@ -201,5 +199,70 @@ public class TestApp {
     String response = testCommand("QUIT\n");
     assertThat(response, containsString("SUCCESS"));
     client.join();
+  }
+
+  @Test
+  public void canSetDefaultAccount() throws IOException {
+    setupCustomerWithAccount("TestCustomer4", "password4");
+
+    String response = testCommand("NEWACCOUNT Main DEFAULT\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    response = testCommand("NEWACCOUNT Checking\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    response = testCommand("DEFAULT Checking\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    String result = testCommand("SHOWMYACCOUNTS\n");
+
+    String[] output = result.split(":");
+    assertThat(output[0].trim(), equalTo("Savings"));
+    assertThat(output[1].trim(), equalTo("0.00 GBP"));
+
+    result = display.getLine();
+    output = result.split(":");
+    assertThat(output[0].trim(), equalTo("Main"));
+    assertThat(output[1].trim(), equalTo("0.00 GBP"));
+
+    result = display.getLine();
+    output = result.split(":");
+    assertThat(output[0].trim(), equalTo("*Checking"));
+    assertThat(output[1].trim(), equalTo("0.00 GBP"));
+  }
+
+  @Test
+  public void handleSettingSavingsAsDefault() throws IOException {
+    setupCustomerWithAccount("TestCustomer5", "password5");
+
+    String response = testCommand("DEFAULT Savings\n");
+    assertThat(response, containsString("FAIL: Account [Savings] cannot be default."));
+  }
+
+  @Test
+  public void checkThatFirstNonSavingsAccountIsDefault() throws IOException {
+    setupCustomerWithAccount("TestCustomer6", "password6");
+
+    String response = testCommand("NEWACCOUNT Main\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    String result = testCommand("SHOWMYACCOUNTS\n");
+
+    String[] output = result.split(":");
+    assertThat(output[0].trim(), equalTo("Savings"));
+    assertThat(output[1].trim(), equalTo("0.00 GBP"));
+
+    result = display.getLine();
+    output = result.split(":");
+    assertThat(output[0].trim(), equalTo("*Main"));
+    assertThat(output[1].trim(), equalTo("0.00 GBP"));
+  }
+
+  @Test
+  public void handleSettingInvalidAccountAsDefault() throws IOException {
+    setupCustomerWithAccount("TestCustomer7", "password7");
+
+    String response = testCommand("DEFAULT Main\n");
+    assertThat(response, containsString("FAIL: Account [Main] does not exist."));
   }
 }

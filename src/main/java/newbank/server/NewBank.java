@@ -5,8 +5,10 @@ import java.util.Optional;
 
 import org.javamoney.moneta.Money;
 
+import newbank.server.exceptions.AccountBalanceInvalidException;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountNameInvalidException;
+import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
@@ -24,22 +26,31 @@ public class NewBank {
   private void addTestData() {
     try {
       Customer bhagy = new Customer("Bhagy", "bhagy");
+
       bhagy.addAccount(new Account("Main", Money.of(1000, "GBP")));
-      customers.put("Bhagy", bhagy);
       bhagy.addAccount(new Account("Savings", Money.of(201.19, "GBP")));
 
+      customers.put("Bhagy", bhagy);
+
       Customer christina = new Customer("Christina", "christina");
+
       christina.addAccount(new Account("Savings", Money.of(1500, "GBP")));
+
       customers.put("Christina", christina);
 
       Customer john = new Customer("John", "john");
+
       john.addAccount(new Account("Checking", Money.of(250, "GBP")));
+
       customers.put("John", john);
     } catch (CustomerMaxAccountsException e) {
       System.err.println("FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS);
       System.exit(1);
     } catch (AccountNameInvalidException e) {
       System.err.println("FAIL: Invalid account name: " + e.getMessage());
+      System.exit(1);
+    } catch (AccountBalanceInvalidException e) {
+      System.err.println("FAIL: Invalid balance specified.");
       System.exit(1);
     }
   }
@@ -84,7 +95,7 @@ public class NewBank {
   }
 
   /**
-   * Check customer's credentials
+   * Check customer's credentials.
    *
    * @param username The customer's username
    * @param password The customer's password
@@ -100,7 +111,7 @@ public class NewBank {
   }
 
   /**
-   * Retrieve and display account information for a given customer
+   * Retrieve and display account information for a given customer.
    *
    * @param customerID The customer identifier
    * @return account information
@@ -118,32 +129,41 @@ public class NewBank {
   }
 
   /**
-   * Create a new account for a given customer
+   * Create a new account for a given customer.
    *
    * @param customerID The customer identifier
    * @param accountName The account name
+   * @param isDefault Indicates whether this is the customer's default account
    * @return A success indicator if the operation was successful, otherwise an error message
+   * @throws AccountInvalidException
    */
-  public synchronized String newAccount(final CustomerID customerID, final String accountName) {
+  public synchronized String newAccount(
+      final CustomerID customerID, final String accountName, final boolean isDefault) {
     Customer customer = customers.get(customerID.getKey());
 
     try {
-      Money openingBalance = Money.of(0, "GBP");
+      customer.addAccount(new Account(accountName, Money.of(0, "GBP")));
 
-      Account account = new Account(accountName, openingBalance);
-
-      customer.addAccount(account);
+      if (isDefault) {
+        customer.setDefaultAccount(accountName);
+      }
 
       return "SUCCESS: The account has been created successfully.";
     } catch (CustomerMaxAccountsException e) {
       return "FAIL: Maximum number of accounts is: " + Customer.MAX_ACCOUNTS;
     } catch (AccountNameInvalidException e) {
       return "FAIL: Invalid account name: " + e.getMessage();
+    } catch (AccountBalanceInvalidException e) {
+      return "FAIL: Account starting balance cannot be negative.";
+    } catch (AccountTypeInvalidException e) {
+      return String.format("FAIL: Account [%s] cannot be default.", accountName);
+    } catch (AccountInvalidException e) {
+      return String.format("FAIL: Account [%s] does not exist.", accountName);
     }
   }
 
   /**
-   * Retrieves the customer with a given name
+   * Retrieves the customer with a given name.
    *
    * @param customerName
    * @return
@@ -152,17 +172,21 @@ public class NewBank {
     return customers
         .entrySet()
         .stream()
-        .filter(e -> e.getValue().getUsername().equals(customerName))
+        .filter(e -> e.getValue().getUsername().equalsIgnoreCase(customerName))
         .findFirst()
         .map(e -> e.getValue());
   }
 
-  private Optional<Account> getAccount(final Customer customer, final String accountName) {
-    return customer.getAccount(accountName);
+  private Account getAccount(final CustomerID customerID, final String accountName)
+      throws AccountInvalidException {
+    Customer customer = customers.get(customerID.getKey());
+    Optional<Account> account = customer.getAccount(accountName);
+
+    return account.orElseThrow(AccountInvalidException::new);
   }
 
   /**
-   * Deposit some money into a specified customer's account
+   * Deposit some money into a specified customer's account.
    *
    * @param customerID The customer identifier
    * @param accountName The account name
@@ -172,9 +196,33 @@ public class NewBank {
       final CustomerID customerID, final String accountName, final Money money)
       throws AccountInvalidException {
 
-    Customer customer = customers.get(customerID.getKey());
-    Optional<Account> account = getAccount(customer, accountName);
+    getAccount(customerID, accountName).addMoney(money);
+  }
 
-    account.orElseThrow(AccountInvalidException::new).addMoney(money);
+  /**
+   * Set the default customer's account. This also clears any previously set default account.
+   *
+   * @param customerID The customer identifier
+   * @param accountName The account name
+   * @throws AccountInvalidException if the customer's account does not exist.
+   * @throws AccountTypeInvalidException
+   */
+  public synchronized void setDefaultAccount(final CustomerID customerID, final String accountName)
+      throws AccountInvalidException, AccountTypeInvalidException {
+    Customer customer = customers.get(customerID.getKey());
+
+    customer.setDefaultAccount(accountName);
+  }
+
+  /**
+   * Determine whether a customer has a default current account set.
+   *
+   * @param customerID The customer identifier
+   * @return true if so, false otherwise.
+   */
+  public boolean hasDefaultAccount(final CustomerID customerID) {
+    Customer customer = customers.get(customerID.getKey());
+
+    return customer.hasDefaultAccount();
   }
 }
