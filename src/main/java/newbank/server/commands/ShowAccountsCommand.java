@@ -15,12 +15,11 @@ public class ShowAccountsCommand extends Command {
 
   @Override
   public String execute() {
-	  try {
-		  checkLoggedIn(customer);
-		  return bank.showAccountsFor(customer);
-	  }
-	  catch( RequestNotAllowedException ex ) {
-		  return ex.getMessage();
-	  }
+    try {
+      checkLoggedIn(customer);
+      return bank.showAccountsFor(customer);
+    } catch (RequestNotAllowedException ex) {
+      return String.format("FAIL: %s", ex.getMessage());
+    }
   }
 }
