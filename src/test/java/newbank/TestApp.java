@@ -11,11 +11,11 @@ import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import newbank.client.ConfigurationException;
 import newbank.client.ExampleClient;
@@ -31,7 +31,7 @@ public class TestApp {
   private Display display;
   private ExampleClient client;
 
-  @Ignore
+  @Disabled
   private String testCommand(String command) throws IOException {
     writer.write(command);
     display.discardLinesUntil("request");
@@ -39,13 +39,13 @@ public class TestApp {
     return display.getLine();
   }
 
-  @BeforeClass
-  public static void beforeAll() throws IOException, InterruptedException {
+  @BeforeAll
+  public static void beforeAll() throws IOException {
     server = new NewBankServer(DEFAULT_PORT);
     server.start();
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws IOException, ConfigurationException {
     reader = new PipedReader();
     writer = new PipedWriter(reader);
@@ -56,8 +56,8 @@ public class TestApp {
     client.start();
   }
 
-  @After
-  public void tearDown() throws IOException, InterruptedException {
+  @AfterEach
+  public void tearDown() throws IOException {
     writer.close();
     client.interrupt();
   }
