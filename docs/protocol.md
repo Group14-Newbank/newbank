@@ -1,3 +1,5 @@
+<h2>General</h2>
+
 <h3>LOGIN</h3>
 
 <table>
@@ -12,11 +14,11 @@
   <tr>
     <td></td>
     <td><em>username</em></td>
-    <td><em>The customer’s username</em></td>
+    <td>The customer’s username</td>
   </tr>
   <tr>
     <td></td>
-    <td>password</td>
+    <td><em>password</em></td>
     <td>The customer’s password</td>
   </tr>
   <tr>
@@ -39,28 +41,57 @@
   </tr>
 </table>
 
-<h3>NEWACCOUNT</h3>
+<h3>QUIT</h3>
 
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Creates a new account for a customer</td>
+    <td colspan="2">Exit application.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
-    <td colspan="2"><code>NEWACCOUNT name</code></td>
+    <td colspan="2"><code>QUIT</code></td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS <em>info</em></td>
+    <td>If the transaction completed successfully, <em>info</em> contains the accounts' information</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ QUIT</code><br /><code>SUCCESS Good bye.</code></td>
+  </tr>
+</table>
+
+<h2>Account administration</h2>
+
+<h3>DEFAULT</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Specify the default current account.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>DEFAULT account_name</code></td>
   </tr>
   <tr>
     <td></td>
-    <td><em>name</em></td>
-    <td><em>A label that identifies the account.</em></td>
+    <td><em>account_name</em></td>
+    <td>A label that identifies the account.</td>
   </tr>
   <tr>
     <td><strong>Comments</strong></td>
     <td colspan="2">
       <ul>
-         <li>Customers must be logged in in order to use this command</li>
-         <li>Accounts labels for a customer must be unique</li>
+         <li>Customers must be logged in in order to use this command.</li>
+         <li>Saving accounts cannot also be the default current account.</li>
       </ul>
     </td>
   </tr>
@@ -76,7 +107,59 @@
   </tr>
   <tr>
     <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ DEFAULT Main</code><br /><code>SUCCESS</code></td>
+  </tr>
+</table>
+
+<h3>NEWACCOUNT</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Creates a new account for a customer</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>NEWACCOUNT name [DEFAULT]</code></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>name</em></td>
+    <td>A label that identifies the account.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>DEFAULT</td>
+    <td>If present this keyword makes the account the default current account.</td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+      <ul>
+         <li>Customers must be logged in in order to use this command.</li>
+         <li>Accounts labels for a customer must be unique.</li>
+         <li>Saving accounts cannot also be the default current account.</li>
+         <li>The first non savings account created for a customer will automatically become the default current account.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS</td>
+    <td>If the transaction completed successfully</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>FAIL <em>message</em></td>
+    <td>If the transaction failed, <em>message</em> provides the error message</td>
+  </tr>
+  <tr>
+    <td><strong>Example 1</strong></td>
     <td colspan="2"><code>$ NEWACCOUNT Savings</code><br /><code>SUCCESS</code></td>
+  </tr>
+  <tr>
+    <td><strong>Example 2</strong></td>
+    <td colspan="2"><code>$ NEWACCOUNT Main DEFAULT</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>
 
@@ -94,11 +177,11 @@
   <tr>
     <td></td>
     <td><em>username</em></td>
-    <td><em>The customer’s username</em></td>
+    <td>The customer’s username</td>
   </tr>
   <tr>
     <td></td>
-    <td>password</td>
+    <td><em>password</em></td>
     <td>The customer’s password</td>
   </tr>
   <tr>
@@ -121,6 +204,8 @@
   </tr>
 </table>
 
+<h2>Transactions</h2>
+
 <h3>SHOWMYACCOUNTS</h3>
 
 <table>
@@ -136,7 +221,7 @@
     <td><strong>Comments</strong></td>
     <td colspan="2">
       <ul>
-         <li>Customers must be logged in in order to use this command</li>
+         <li>Customers must be logged in in order to use this command.</li>
       </ul>
     </td>
   </tr>
@@ -170,19 +255,19 @@
   <tr>
     <td></td>
     <td><em>account_name</em></td>
-    <td><em>The account name</em></td>
+    <td>The account name</td>
   </tr>
   <tr>
     <td></td>
-    <td>amount</td>
+    <td><em>amount</em></td>
     <td>The amount to deposit</td>
   </tr>
   <tr>
     <td><strong>Comments</strong></td>
     <td colspan="2">
       <ul>
-         <li>Customers must be logged in in order to use this command</li>
-         <li>By default the currency used is GBP.</li>
+         <li>Customers must be logged in in order to use this command.</li>
+         <li>The default currency used is GBP.</li>
       </ul>
     </td>
   </tr>
@@ -202,29 +287,49 @@
   </tr>
 </table>
 
-<h3>QUIT</h3>
+<h3>PAY</h3>
 
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Exit application.</td>
+    <td colspan="2">Credit a specified customer's default current account.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
-    <td colspan="2"><code>QUIT</code></td>
+    <td colspan="2"><code>PAY person amount</code></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>person</em></td>
+    <td>The recipient's name</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>amount</em></td>
+    <td>The amount to credit</td>
   </tr>
   <tr>
     <td><strong>Comments</strong></td>
     <td colspan="2">
+      <ul>
+         <li>Customers must be logged in in order to use this command.</li>
+         <li>The default currency used is GBP.</li>
+         <li>The amount specified cannot exceed the sender's default account balance.</li>
+      </ul>
     </td>
   </tr>
   <tr>
     <td><strong>Returns</strong></td>
-    <td>SUCCESS <em>info</em></td>
-    <td>If the transaction completed successfully, <em>info</em> contains the accounts' information</td>
+    <td>SUCCESS</td>
+    <td>If the transaction completed successfully.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>FAIL <em>message</em></td>
+    <td>If the transaction failed, <em>message</em> provides the error message</td>
   </tr>
   <tr>
     <td><strong>Example</strong></td>
-    <td colspan="2"><code>$ QUIT</code><br /><code>SUCCESS Good bye.</code></td>
+    <td colspan="2"><code>$ PAY John 200.0</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>

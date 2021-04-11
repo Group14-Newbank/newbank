@@ -63,7 +63,11 @@ public class Account {
     return balance;
   }
 
-  public void addMoney(Money amount) {
-    balance = balance.add(Money.of(amount.getNumber(), "GBP"));
+  public void credit(final Money amount) {
+    balance = balance.add(amount);
+  }
+
+  public void debit(final Money amount) {
+    balance = balance.subtract(amount);
   }
 }
