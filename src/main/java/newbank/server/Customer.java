@@ -25,22 +25,27 @@ public class Customer {
   public String accountsToString() {
     StringBuilder s = new StringBuilder();
     for (Account a : accounts) {
-      if(defaultAccount.isPresent() && a == defaultAccount.get()) {
-    	  s.append('*');
+      if (defaultAccount.isPresent() && a == defaultAccount.get()) {
+        s.append('*');
       }
-      
+
       s.append(a.toString());
       s.append("\n");
     }
     return s.toString();
   }
 
-  public void addAccount(Account account) throws CustomerMaxAccountsException {
+  public void addAccount(Account account)
+      throws CustomerMaxAccountsException, AccountInvalidException, AccountTypeInvalidException {
     if (accounts.size() >= MAX_ACCOUNTS) {
       throw new CustomerMaxAccountsException();
     }
 
     accounts.add(account);
+
+    if (!hasDefaultAccount() && !Account.isSavingsAccount(account.getName())) {
+      setDefaultAccount(account.getName());
+    }
   }
 
   public String getUsername() {
@@ -55,18 +60,24 @@ public class Customer {
     return accounts.stream().filter(a -> a.getName().equalsIgnoreCase(accountName)).findFirst();
   }
 
+  public Optional<Account> getDefaultAccount() {
+    return defaultAccount;
+  }
+
   /**
    * Set the customer's default current account.
    *
    * @param accountName The account name
-   * @throws AccountInvalidException if the account does not exist.
- * @throws AccountTypeInvalidException 
+   * @throws AccountInvalidException if the specified account does not exist.
+   * @throws AccountTypeInvalidException if the the given account type cannot be set as the default
+   *     account.
    */
-  public void setDefaultAccount(final String accountName) throws AccountInvalidException, AccountTypeInvalidException {
+  public void setDefaultAccount(final String accountName)
+      throws AccountInvalidException, AccountTypeInvalidException {
     Optional<Account> newDefault =
         accounts.stream().filter(e -> e.getName().equalsIgnoreCase(accountName)).findFirst();
 
-    Account acc = newDefault.orElseThrow(AccountInvalidException::new);
+    Account acc = newDefault.orElseThrow(() -> new AccountInvalidException(username));
 
     if (Account.isSavingsAccount(accountName)) {
       throw new AccountTypeInvalidException();
