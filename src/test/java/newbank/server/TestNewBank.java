@@ -4,19 +4,25 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 public class TestNewBank {
   private static NewBank bank;
 
-  @BeforeClass
-  public static void setupBank() throws DuplicateCustomerException, PasswordInvalidException {
+  @BeforeAll
+  public static void setupBank() {
     bank = NewBank.getBank();
   }
 
@@ -28,22 +34,21 @@ public class TestNewBank {
     assertThat(bank.getCustomer("customer2").isPresent(), equalTo(true));
   }
 
-  @Test(expected = DuplicateCustomerException.class)
-  public void throwsWhenAddingDuplicateCustomer()
-      throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("customer3", "Abc123");
-    bank.addCustomer("customer3", "Abc123");
+  private static Stream<Arguments> provideParamsForRegisterExceptions() {
+    return Stream.of(
+        Arguments.of(UsernameInvalidException.class, "12345", "Abc123"),
+        Arguments.of(PasswordInvalidException.class, "customer4", ""),
+        Arguments.of(DuplicateCustomerException.class, "customer3", "Abc123")
+    );
   }
 
-  @Test(expected = UsernameInvalidException.class)
-  public void throwsWhenRegisteringWithInvalidName()
-      throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("12345", "Abc123");
-  }
-
-  @Test(expected = PasswordInvalidException.class)
-  public void throwsWhenRegisteringWithInvalidPassword() throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-	  bank.addCustomer("customer4", "");
+  @ParameterizedTest
+  @MethodSource("provideParamsForRegisterExceptions")
+  public void throwsOnInvalidRegistration(Class<Throwable> e, String username, String password) {
+    assertThrows(e, () -> {
+      bank.addCustomer(username, password);
+      bank.addCustomer(username, password);
+    });
   }
   
   @Test
