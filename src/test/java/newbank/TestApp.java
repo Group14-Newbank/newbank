@@ -1,7 +1,7 @@
 package newbank;
 
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
@@ -219,7 +219,7 @@ public class TestApp {
 
     result = display.getLine();
     assertThat(result, matchesPattern("Main:\\s+0.00\\s+GBP"));
-    
+
     result = display.getLine();
     assertThat(result, matchesPattern("[*]Checking:\\s+0.00\\s+GBP"));
   }
@@ -276,7 +276,7 @@ public class TestApp {
     response = testCommand("PAY John 1000.0\n");
     assertThat(response, containsString("FAIL: Insufficient funds to perform transaction."));
   }
-  
+
   @Test
   public void canHandleInvalidPayRecipient() throws IOException {
     setupCustomerWithAccount("TestCustomer10", "password10");
@@ -286,7 +286,7 @@ public class TestApp {
     response = testCommand("PAY Jason 1000.0\n");
     assertThat(response, containsString("FAIL: Customer [Jason] does not exist."));
   }
-  
+
   @Test
   public void canHandleInvalidCreditAmount() throws IOException {
     setupCustomerWithAccount("TestCustomer11", "password11");
@@ -295,5 +295,20 @@ public class TestApp {
 
     response = testCommand("PAY John -100.0\n");
     assertThat(response, containsString("FAIL: Credit amount [-100.0] invalid."));
+  }
+
+  @Test
+  public void canHandleInvalidCommandsBeforeLoggingIn() throws IOException {
+    String response = testCommand("NEWACCOUNT accountB\n");
+    assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
+
+    response = testCommand("DEPOSIT Savings 1000.0\n");
+    assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
+
+    response = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
+    
+    response = testCommand("PAY Jason 1000.0\n");
+    assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
   }
 }
