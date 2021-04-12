@@ -6,6 +6,7 @@ import java.util.Optional;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
+import newbank.server.microloans.UserLoanHistory;
 
 import static newbank.Configuration.MAX_ACCOUNTS;
 
@@ -104,6 +105,10 @@ public class Customer {
   /** @return true if the customer has a default current account, false otherwise. */
   public boolean hasDefaultAccount() {
     return defaultAccount.isPresent();
+  }
+
+  public UserLoanHistory getLoanHistory() {
+    return new UserLoanHistory(this);
   }
 
   @Override

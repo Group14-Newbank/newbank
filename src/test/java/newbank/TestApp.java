@@ -1,6 +1,6 @@
 package newbank;
 
-import static newbank.Configuration.DEFAULT_PORT;
+import static newbank.Configuration.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,7 +10,12 @@ import static org.hamcrest.Matchers.not;
 import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
+import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.stream.Stream;
 
+import newbank.server.NewBank;
+import org.javamoney.moneta.Money;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -22,6 +27,11 @@ import newbank.client.ExampleClient;
 import newbank.server.NewBankServer;
 import newbank.utils.Display;
 import newbank.utils.QueueDisplay;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import javax.money.MonetaryAmount;
 
 public class TestApp {
   private static NewBankServer server;
@@ -315,4 +325,53 @@ public class TestApp {
     response = testCommand("DEFAULT Savings\n");
     assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
   }
+
+  @Test
+  public void canRequestExactlyOneMicroloan() throws IOException {
+    final String username = "canRequestExactlyOneMicroloan";
+    setupCustomerWithAccount(username, "password0");
+
+    String response = testCommand(String.format(
+        "REQUESTLOAN %s %s\n", MAX_MICROLOAN.getNumber().toString(), MAX_REPAYMENT_PERIOD_DAYS
+    ));
+    assertThat(response, containsString("SUCCESS"));
+    assertThat("The user now has 1 loan-request", 
+        NewBank.getBank().getCustomer(username).get()
+            .getLoanHistory().hasCurrentLoanRequest()
+    );
+    
+    response = testCommand("REQUESTLOAN 100 60\n");
+    assertThat(response, matchesPattern("FAIL:.+already.+request"));
+  }
+
+  private static Stream<Arguments> badLoanRequestParams() {
+    return Stream.of(
+        Arguments.of("term.+invalid", "100", "years?"),
+        Arguments.of("term.+invalid", "100", "0"),
+        Arguments.of("term.+exceeds maximum", "100", Integer.toString(MAX_REPAYMENT_PERIOD_DAYS + 1)),
+        Arguments.of("loan.+invalid", "money", "365"),
+        Arguments.of("loan.+invalid", "0", "365"),
+        Arguments.of(
+            "loan.+exceeds maximum",
+            MAX_MICROLOAN.add(Money.of(1, MAX_MICROLOAN.getCurrency())).getNumber().toString(),
+            "365"
+        )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("badLoanRequestParams")
+  public void invalidMicroloanRequestFails(String failReason, String amount, String term) throws IOException {
+    int hash = Math.abs(String.format("%s#%s#%s", failReason, amount, term).hashCode());
+    setupCustomerWithAccount(
+        String.format("TestCustomer%d", hash),
+        String.format("password7%d", hash)
+    );
+
+    String response = testCommand(String.format("REQUESTLOAN %s %s\n", amount, term)).toLowerCase();
+    assertThat(response, matchesPattern(String.format("fail:.+%s.+", failReason)));
+  }
+  
+  // TODO cannotRequestMicroloanWhenAlreadyHave3
+  // TODO cannotRequestMicroloanWhenDefaultedInPast
 }

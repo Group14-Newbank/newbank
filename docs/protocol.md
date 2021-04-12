@@ -333,3 +333,40 @@
     <td colspan="2"><code>$ PAY John 200.0</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>
+
+<h2>Micro-loans</h2>
+
+<h3>REQUESTLOAN</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Request a peer-to-peer loan. Requests can be seen by all other users.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>REQUESTLOAN amount repayment-term-days</code></td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+      <ul>
+         <li>Customers must be logged in in order to use this command.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS</td>
+    <td>If the request is made successfully</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>FAIL <em>message</em></td>
+    <td>If the request failed, <em>message</em> provides the error message</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ REQUESTLOAN 1000 365</code><br /><code>SUCCESS</code></td>
+  </tr>
+</table>
