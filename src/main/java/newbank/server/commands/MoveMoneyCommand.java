@@ -1,5 +1,9 @@
 package newbank.server.commands;
 
+import java.math.BigDecimal;
+
+import org.javamoney.moneta.Money;
+
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.RequestNotAllowedException;
@@ -17,15 +21,22 @@ public class MoveMoneyCommand extends Command {
   }
 
   private void validateSyntax() throws SyntaxInvalidException {
-    if (tokens.length != 2) {
-      throw new SyntaxInvalidException("The proper syntax is: MoveMoney <Name>");
+    if (tokens.length != 3) {
+      throw new SyntaxInvalidException("The proper syntax is: MoveMoney <Amount> <From> <To>.");
     }
   }
 
   @Override
   public String execute() {
     try {
+      BigDecimal money = new BigDecimal(amounts[0]);
+      if (money <= 0) {
 
+      }
+
+      Money money = Money.of(amount, "GBP");
+
+      if (money < 0)
     } catch (RequestNotAllowedException | SyntaxInvalidException ex) {
       return String.format("FAIL: %s", ex.getMessage());
     }
