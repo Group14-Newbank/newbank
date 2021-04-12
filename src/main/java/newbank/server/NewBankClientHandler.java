@@ -10,6 +10,7 @@ import java.util.Map;
 
 import newbank.server.commands.Command;
 import newbank.server.commands.CommandSupplier;
+import newbank.server.commands.DefaultCommand;
 import newbank.server.commands.DepositCommand;
 import newbank.server.commands.LoginCommand;
 import newbank.server.commands.NewAccountCommand;
@@ -43,11 +44,12 @@ public class NewBankClientHandler extends Thread {
     commands.put("QUIT", QuitCommand::new);
     commands.put("REGISTER", RegisterCommand::new);
     commands.put("SHOWMYACCOUNTS", ShowAccountsCommand::new);
+    commands.put("DEFAULT", DefaultCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
   }
 
   private Command getCommand(final String name, final String[] tokens) {
-	return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
+    return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
   }
 
   private boolean processRequest(final String request) {

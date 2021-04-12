@@ -1,9 +1,9 @@
 package newbank.server.commands;
 
+import newbank.server.Account;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.RequestNotAllowedException;
-import newbank.server.exceptions.SyntaxInvalidException;
 
 public class NewAccountCommand extends Command {
   private final NewBank bank;
@@ -16,10 +16,12 @@ public class NewAccountCommand extends Command {
     this.customer = customer;
   }
 
-  private void validateSyntax() throws SyntaxInvalidException {
-    if (tokens.length != 2) {
-      throw new SyntaxInvalidException("The proper syntax is: NEWACCOUNT <Name>");
-    }
+  protected String getSyntax() {
+    return "NEWACCOUNT <Name> [Default]";
+  }
+
+  private boolean isFirstNonSavingsAccount(final String accountName) {
+    return !Account.isSavingsAccount(accountName) && !bank.hasDefaultAccount(customer);
   }
 
   @Override
@@ -27,10 +29,28 @@ public class NewAccountCommand extends Command {
     try {
       checkLoggedIn(customer);
 
-      validateSyntax();
+      if (!(tokens.length >= 2)) {
+        return String.format("FAIL: Usage: %s", getSyntax());
+      }
 
-      return bank.newAccount(customer, tokens[1]);
-    } catch (RequestNotAllowedException | SyntaxInvalidException ex) {
+      boolean isDefault = false;
+      final String accountName = tokens[1];
+
+      if (tokens.length == 3) {
+        if (!tokens[2].equalsIgnoreCase("DEFAULT")) {
+          return String.format("FAIL: Usage: %s", getSyntax());
+        }
+
+        isDefault = true;
+      }
+
+      // first non savings account automatically gets designated as default account
+      if (!isDefault && isFirstNonSavingsAccount(accountName)) {
+        isDefault = true;
+      }
+
+      return bank.newAccount(customer, accountName, isDefault);
+    } catch (RequestNotAllowedException ex) {
       return String.format("FAIL: %s", ex.getMessage());
     }
   }
