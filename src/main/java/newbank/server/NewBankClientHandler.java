@@ -60,7 +60,7 @@ public class NewBankClientHandler extends Thread {
     final String commandName = tokens[0].toUpperCase();
     final Command command = getCommand(commandName, tokens);
 
-    if (tokens.length == 2 && tokens[1].equalsIgnoreCase("HELP")) {
+    if (tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP")) {
       out.println(command.getUsage());
     } else {
       try {
