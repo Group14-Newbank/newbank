@@ -43,7 +43,7 @@ public class TestNewBank {
 
   @Test(expected = PasswordInvalidException.class)
   public void throwsWhenRegisteringWithInvalidPassword() throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-	  bank.addCustomer("customer4", "Abc123");
+	  bank.addCustomer("customer4", "");
   }
   
   @Test
