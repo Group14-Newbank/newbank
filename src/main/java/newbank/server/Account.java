@@ -1,7 +1,5 @@
 package newbank.server;
 
-import javax.naming.InsufficientResourcesException;
-
 import org.javamoney.moneta.Money;
 
 import newbank.server.exceptions.AccountBalanceInsufficientException;
