@@ -75,11 +75,10 @@ public class NewBank {
   }
 
   // Simple algorithm to check that the password meets the security requirements
-  // must be non-empty
+  // must contain at least one number, uppercase letter and lowercase letter
   private void validatePassword(final String password) throws PasswordInvalidException {
     if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")){
-        if (password.isEmpty());
-        throw new PasswordInvalidException();
+      throw new PasswordInvalidException();
     }
   }
 
