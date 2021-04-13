@@ -78,8 +78,8 @@ public class NewBank {
   // must be non-empty
   private void validatePassword(final String password) throws PasswordInvalidException {
     if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")){
-      if (password.isEmpty());
-      throw new PasswordInvalidException();
+        if (password.isEmpty());
+        throw new PasswordInvalidException();
     }
   }
 

@@ -40,7 +40,7 @@ public class RegisterCommand extends Command {
     } catch (DuplicateCustomerException ex) {
       return "FAIL: " + String.format("Customer name [%s] already exists.", username);
     } catch (PasswordInvalidException e) {
-      return "FAIL: Specified password does not meet the security requirements.";
+      return "FAIL: Password must contain mixture of uppercase and lowercase letters and at least one number.";
     } catch (UsernameInvalidException e) {
       return String.format(
           "FAIL: Username [%s] invalid. Username must start with a letter and contain only letters and digits.",
