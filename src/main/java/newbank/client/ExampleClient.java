@@ -16,6 +16,7 @@ import org.fusesource.jansi.AnsiConsole;
 import static org.fusesource.jansi.Ansi.*;
 import static org.fusesource.jansi.Ansi.Color.*;
 
+import newbank.utils.Config;
 import newbank.utils.ConsoleDisplay;
 import newbank.utils.Display;
 
@@ -79,14 +80,19 @@ public class ExampleClient extends Thread {
   }
 
   protected void processResponse(final String response) {
-    final String[] tokens = response.trim().split(":");
 
-    if (tokens.length == 2) {
-      if (tokens[0].startsWith("SUCCESS")) {
-        display.writeLine(ansi().fg(GREEN).a("SUCCESS ").reset().a(tokens[1]).toString());
+    if (response.trim().matches("^(SUCCESS|FAIL).*")) {
+      if (response.startsWith("SUCCESS")) {
+        display.write(ansi().fg(GREEN).a("SUCCESS ").reset().toString());
       } else {
-        display.writeLine(ansi().fg(RED).a("FAIL ").reset().a(tokens[1]).toString());
+        display.write(ansi().fg(RED).a("FAIL ").reset().toString());
       }
+
+      String responseBody = response.replaceFirst("^(SUCCESS|FAIL):", "");
+      responseBody = responseBody.replace(Config.MULTILINE_INFO_SEPARATOR, "\n");
+
+      display.writeLine(responseBody);
+
     } else {
       display.writeLine(response);
     }
@@ -118,6 +124,7 @@ public class ExampleClient extends Thread {
 
   public void run() {
     displayWelcomingMessage();
+    displayHints();
     displayPrompt();
 
     try {
@@ -141,8 +148,9 @@ public class ExampleClient extends Thread {
           }
         }
 
-        displayPrompt();
         gotReply = false;
+        displayHints();
+        displayPrompt();
       }
     } catch (IOException e) {
       e.printStackTrace();
@@ -151,6 +159,19 @@ public class ExampleClient extends Thread {
 
   protected void displayPrompt() {
     display.write("$ ");
+  }
+
+  protected void displayHints() {
+    display.writeLine(
+        "Enter " + ansi().fg(CYAN).a("HELP").reset().a(" to see available commands.").toString());
+    display.writeLine(
+        "Enter "
+            + ansi()
+                .fg(CYAN)
+                .a("<COMMAND> HELP")
+                .reset()
+                .a(" for help on a specific command.")
+                .toString());
   }
 
   private void displayWelcomingMessage() {

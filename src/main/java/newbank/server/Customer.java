@@ -6,6 +6,7 @@ import java.util.Optional;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
+import newbank.utils.Config;
 
 public class Customer {
   private String username;
@@ -30,7 +31,7 @@ public class Customer {
       }
 
       s.append(a.toString());
-      s.append("\n");
+      s.append(Config.MULTILINE_INFO_SEPARATOR);
     }
     return s.toString();
   }

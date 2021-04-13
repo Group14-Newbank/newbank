@@ -14,6 +14,10 @@ public class TestClient extends ExampleClient {
     // NOT NEEDED FOR TEST CLIENT
   }
 
+  protected void displayHints() {
+    // NOT NEEDED FOR TEST CLIENT
+  }
+
   protected void processResponse(final String response) {
     display.writeLine(response);
   }

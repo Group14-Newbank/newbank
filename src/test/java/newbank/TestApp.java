@@ -19,6 +19,7 @@ import org.junit.Test;
 import newbank.client.ConfigurationException;
 import newbank.client.TestClient;
 import newbank.server.NewBankServer;
+import newbank.utils.Config;
 import newbank.utils.Display;
 import newbank.utils.QueueDisplay;
 
@@ -71,10 +72,23 @@ public class TestApp {
 
   private void checkAccountBalance(final String account, final String balance) throws IOException {
     String result = testCommand("SHOWMYACCOUNTS\n");
+    String[] info = result.split(Config.MULTILINE_INFO_SEPARATOR);
+    assertThat(info.length, equalTo(2));
 
+    result = info[1];
     String[] output = result.split(":");
     assertThat(output[0].trim(), equalTo(account));
     assertThat(output[1].trim(), equalTo(balance));
+  }
+
+  void testShowMyAccountsOutput(String[] patterns) throws IOException {
+    String accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    String[] outputLines = accountSummary.split(Config.MULTILINE_INFO_SEPARATOR);
+    assertThat(outputLines.length, equalTo(patterns.length + 1));
+
+    for (int i = 0; i < patterns.length; i++) {
+      assertThat(outputLines[i+1], matchesPattern(patterns[i]));
+    }
   }
 
   @Test
@@ -125,12 +139,10 @@ public class TestApp {
     String response = logIn("Bhagy", "Bhagy123");
     assertThat(response, containsString("SUCCESS"));
 
-    String accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1000.00\\s+GBP"));
-
-    accountSummary = display.getLine();
-    assertThat(accountSummary, matchesPattern("Savings:\\s+201.19\\s+GBP"));
-    assertThat(display.getLine(), equalTo(""));
+    testShowMyAccountsOutput(new String[] {
+        "[*]Main:\\s+1000.00\\s+GBP",
+        "Savings:\\s+201.19\\s+GBP"
+    });
 
     response = testCommand("MOVE money please\n");
     assertThat(
@@ -163,32 +175,29 @@ public class TestApp {
         response, equalTo("SUCCESS: Money transferred from [Savings] to [Main] successfully."));
 
     // The balances are updated
-    accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1101.19\\s+GBP"));
-    accountSummary = display.getLine();
-    assertThat(accountSummary, matchesPattern("Savings:\\s+100.00\\s+GBP"));
-    assertThat(display.getLine(), equalTo(""));
+    testShowMyAccountsOutput(new String[] {
+        "[*]Main:\\s+1101.19\\s+GBP",
+        "Savings:\\s+100.00\\s+GBP"
+    });
 
     response = testCommand("MOVE Main Savings 1100\n");
     assertThat(
         response, equalTo("SUCCESS: Money transferred from [Main] to [Savings] successfully."));
 
     // The balances are updated
-    accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1.19\\s+GBP"));
-    accountSummary = display.getLine();
-    assertThat(accountSummary, matchesPattern("Savings:\\s+1200.00\\s+GBP"));
-    assertThat(display.getLine(), equalTo(""));
+    testShowMyAccountsOutput(new String[] {
+        "[*]Main:\\s+1.19\\s+GBP",
+        "Savings:\\s+1200.00\\s+GBP"
+    });
 
     response = testCommand("MOVE Main Savings 2\n");
     assertThat(response, equalTo("FAIL: Insufficient balance in [Main], missing: [GBP 0.81]."));
 
     // The balances remain the same
-    accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1.19\\s+GBP"));
-    accountSummary = display.getLine();
-    assertThat(accountSummary, matchesPattern("Savings:\\s+1200.00\\s+GBP"));
-    assertThat(display.getLine(), equalTo(""));
+    testShowMyAccountsOutput(new String[] {
+        "[*]Main:\\s+1.19\\s+GBP",
+        "Savings:\\s+1200.00\\s+GBP"
+    });
   }
 
   @Test
@@ -273,14 +282,11 @@ public class TestApp {
     response = testCommand("DEFAULT Checking\n");
     assertThat(response, containsString("SUCCESS"));
 
-    String result = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(result, matchesPattern("Savings:\\s+0.00\\s+GBP"));
-
-    result = display.getLine();
-    assertThat(result, matchesPattern("Main:\\s+0.00\\s+GBP"));
-
-    result = display.getLine();
-    assertThat(result, matchesPattern("[*]Checking:\\s+0.00\\s+GBP"));
+    testShowMyAccountsOutput(new String[] {
+        "Savings:\\s+0.00\\s+GBP",
+        "Main:\\s+0.00\\s+GBP",
+        "[*]Checking:\\s+0.00\\s+GBP"
+    });
   }
 
   @Test
@@ -306,11 +312,10 @@ public class TestApp {
     String response = testCommand("NEWACCOUNT Main\n");
     assertThat(response, containsString("SUCCESS"));
 
-    String result = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(result, matchesPattern("Savings:\\s+0.00\\s+GBP"));
-
-    result = display.getLine();
-    assertThat(result, matchesPattern("[*]Main:\\s+0.00\\s+GBP"));
+    testShowMyAccountsOutput(new String[]{
+        "Savings:\\s+0.00\\s+GBP",
+        "[*]Main:\\s+0.00\\s+GBP"
+    });
   }
 
   @Test
