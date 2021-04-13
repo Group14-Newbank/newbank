@@ -109,7 +109,8 @@ public class ExampleClient extends Thread {
             + "    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|   |_|\\___/  |_| \\_|\\___| \\_/\\_/ |_.__/ \\__,_|_| |_|_|\\_\\\n";
 
     display.writeLine(message);
-    System.out.println("\n" + "\033[3mPlease login using the following format: \033[1m" + "\033[3mlogin username password\033[0m");
+    System.out.println("\n" + "\033[3mPlease login using the following format: \033[1m" + "\033[3mlogin username password\033[0m"
+            + "\n" + "\033[3mPlease register using the following format: \033[1m" + "\033[3mregister username password\033[0m");
   }
 
   public static void main(String[] args) {
