@@ -84,7 +84,7 @@ public class TestApp {
 
   @Test
   public void canDisplayBalance() throws IOException {
-    String response = logIn("Bhagy", "bhagy");
+    String response = logIn("Bhagy", "Bhagy123");
     assertThat(response, containsString("SUCCESS"));
 
     String accountSummary = testCommand("SHOWMYACCOUNTS\n");
@@ -97,7 +97,7 @@ public class TestApp {
 
   @Test
   public void canCreateNewAccount() throws IOException {
-    String response = logIn("John", "john");
+    String response = logIn("John", "John123");
     assertThat(response, containsString("SUCCESS"));
 
     response = testCommand("NEWACCOUNT\n");
@@ -151,9 +151,9 @@ public class TestApp {
 
   @Test
   public void canRegisterCustomer() throws IOException {
-    addCustomer("TestCustomer1", "password1");
+    addCustomer("TestCustomer1", "Password1");
 
-    String response = logIn("TestCustomer1", "password1");
+    String response = logIn("TestCustomer1", "Password1");
     assertThat(response, containsString("SUCCESS"));
   }
 
@@ -170,7 +170,7 @@ public class TestApp {
 
   @Test
   public void canDepositMoney() throws IOException {
-    setupCustomerWithAccount("TestCustomer2", "password2");
+    setupCustomerWithAccount("TestCustomer2", "Password2");
 
     String response = testCommand("DEPOSIT Savings 1000.0\n");
     assertThat(response, containsString("SUCCESS"));
@@ -185,7 +185,7 @@ public class TestApp {
 
   @Test
   public void canHandleInvalidDepositAccountOrAmount() throws IOException {
-    setupCustomerWithAccount("TestCustomer3", "password3");
+    setupCustomerWithAccount("TestCustomer3", "Password3");
 
     String response = testCommand("DEPOSIT Main 1000.0\n");
     assertThat(response, containsString("FAIL"));
@@ -203,7 +203,7 @@ public class TestApp {
 
   @Test
   public void canSetDefaultAccount() throws IOException {
-    setupCustomerWithAccount("TestCustomer4", "password4");
+    setupCustomerWithAccount("TestCustomer4", "Password4");
 
     String response = testCommand("NEWACCOUNT Main DEFAULT\n");
     assertThat(response, containsString("SUCCESS"));
@@ -226,7 +226,7 @@ public class TestApp {
 
   @Test
   public void canHandleSettingSavingsAsDefault() throws IOException {
-    setupCustomerWithAccount("TestCustomer5", "password5");
+    setupCustomerWithAccount("TestCustomer5", "Password5");
 
     String response = testCommand("DEFAULT Savings\n");
     assertThat(response, containsString("FAIL: Account [Savings] cannot be default."));
@@ -234,7 +234,7 @@ public class TestApp {
 
   @Test
   public void canHandleSettingNonExistingAccountAsDefault() throws IOException {
-    setupCustomerWithAccount("TestCustomer7", "password7");
+    setupCustomerWithAccount("TestCustomer7", "Password7");
 
     String response = testCommand("DEFAULT Main\n");
     assertThat(response, equalTo("FAIL: Account [Main] does not exist."));
@@ -242,7 +242,7 @@ public class TestApp {
 
   @Test
   public void checkThatFirstNonSavingsAccountIsDefault() throws IOException {
-    setupCustomerWithAccount("TestCustomer6", "password6");
+    setupCustomerWithAccount("TestCustomer6", "Password6");
 
     String response = testCommand("NEWACCOUNT Main\n");
     assertThat(response, containsString("SUCCESS"));
@@ -256,7 +256,7 @@ public class TestApp {
 
   @Test
   public void canPayCustomer() throws IOException {
-    setupCustomerWithAccount("TestCustomer8", "password8");
+    setupCustomerWithAccount("TestCustomer8", "Password8");
     String response = testCommand("NEWACCOUNT Main DEFAULT\n");
     assertThat(response, containsString("SUCCESS"));
 
@@ -269,7 +269,7 @@ public class TestApp {
 
   @Test
   public void canHandleInsufficientFunds() throws IOException {
-    setupCustomerWithAccount("TestCustomer9", "password9");
+    setupCustomerWithAccount("TestCustomer9", "Password9");
     String response = testCommand("NEWACCOUNT Main DEFAULT\n");
     assertThat(response, containsString("SUCCESS"));
 
@@ -279,7 +279,7 @@ public class TestApp {
 
   @Test
   public void canHandleInvalidPayRecipient() throws IOException {
-    setupCustomerWithAccount("TestCustomer10", "password10");
+    setupCustomerWithAccount("TestCustomer10", "Password10");
     String response = testCommand("NEWACCOUNT Main DEFAULT\n");
     assertThat(response, containsString("SUCCESS"));
 
@@ -289,7 +289,7 @@ public class TestApp {
 
   @Test
   public void canHandleInvalidCreditAmount() throws IOException {
-    setupCustomerWithAccount("TestCustomer11", "password11");
+    setupCustomerWithAccount("TestCustomer11", "Password11");
     String response = testCommand("NEWACCOUNT Main DEFAULT\n");
     assertThat(response, containsString("SUCCESS"));
 

@@ -24,21 +24,21 @@ public class TestNewBank {
   public void canRegisterNewCustomer()
       throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
     assertThat(bank.getCustomer("customer2").isPresent(), equalTo(false));
-    bank.addCustomer("customer2", "123456");
+    bank.addCustomer("customer2", "Abc123");
     assertThat(bank.getCustomer("customer2").isPresent(), equalTo(true));
   }
 
   @Test(expected = DuplicateCustomerException.class)
   public void throwsWhenAddingDuplicateCustomer()
       throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("customer3", "123456");
-    bank.addCustomer("customer3", "123456");
+    bank.addCustomer("customer3", "Abc123");
+    bank.addCustomer("customer3", "Abc123");
   }
 
   @Test(expected = UsernameInvalidException.class)
   public void throwsWhenRegisteringWithInvalidName()
       throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("12345", "123456");
+    bank.addCustomer("12345", "Abc123");
   }
 
   @Test(expected = PasswordInvalidException.class)
@@ -49,8 +49,8 @@ public class TestNewBank {
   @Test
   public void canLogIn()
       throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("customer1", "123456");
-    assertThat(bank.checkLogInDetails("customer1", "123"), nullValue());
-    assertThat(bank.checkLogInDetails("customer1", "123456"), not(equalTo(nullValue())));
+    bank.addCustomer("customer1", "Abc123456");
+    assertThat(bank.checkLogInDetails("customer1", "Abc123"), nullValue());
+    assertThat(bank.checkLogInDetails("customer1", "Abc123456"), not(equalTo(nullValue())));
   }
 }
