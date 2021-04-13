@@ -52,7 +52,7 @@ public class MoveMoneyCommand extends Command {
 
       bank.moveMoney(customer, accountNameFrom, accountNameTo, Money.of(amount, Account.DEFAULT_CURRENCY));
 
-      return "SUCCESS: Account credited successfully.";
+      return String.format("SUCCESS: Money transferred from [%s] to [%s] successfully.", accountNameFrom, accountNameTo);
     } catch (NumberFormatException ex) {
       return String.format("FAIL: Specified amount [%s] invalid.", amountString);
     } catch (AccountInvalidException ex) {
