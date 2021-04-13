@@ -12,6 +12,7 @@ import newbank.server.commands.Command;
 import newbank.server.commands.CommandSupplier;
 import newbank.server.commands.DefaultCommand;
 import newbank.server.commands.DepositCommand;
+import newbank.server.commands.HelpCommand;
 import newbank.server.commands.LoginCommand;
 import newbank.server.commands.LogoutCommand;
 import newbank.server.commands.MoveMoneyCommand;
@@ -54,6 +55,7 @@ public class NewBankClientHandler extends Thread {
     commands.put("DEFAULT", DefaultCommand::new);
     commands.put("PAY", PayCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
+    commands.put("HELP", HelpCommand::new);
   }
 
   private void handleCommandHelp(final Command command) {

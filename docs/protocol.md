@@ -5,7 +5,7 @@
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Log into the application</td>
+    <td colspan="2">Log into the application.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
@@ -46,7 +46,7 @@
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Exit application.</td>
+    <td colspan="2">Exit the application.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
@@ -65,6 +65,33 @@
   <tr>
     <td><strong>Example</strong></td>
     <td colspan="2"><code>$ QUIT</code><br /><code>SUCCESS Good bye.</code></td>
+  </tr>
+</table>
+
+<h3>HELP</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Get the list of all available commands.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>HELP</code></td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS <em>info</em></td>
+    <td><em>info</em> contains the available commands</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ HELP</code> SUCCESS ...</td>
   </tr>
 </table>
 
@@ -116,7 +143,7 @@
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Creates a new account for a customer</td>
+    <td colspan="2">Creates a new account for a customer.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
@@ -168,7 +195,7 @@
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Adds a new customer to the application</td>
+    <td colspan="2">Adds a new customer to the application.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
@@ -211,7 +238,7 @@
 <table>
   <tr>
     <td><strong>Description</strong></td>
-    <td colspan="2">Retrieves and displays a list of all the customers’ accounts along with their current balance</td>
+    <td colspan="2">Retrieves and displays a list of all the customers’ accounts along with their current balance.</td>
   </tr>
   <tr>
     <td><strong>Syntax</strong></td>
