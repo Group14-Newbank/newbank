@@ -13,6 +13,7 @@ import newbank.server.commands.CommandSupplier;
 import newbank.server.commands.DefaultCommand;
 import newbank.server.commands.DepositCommand;
 import newbank.server.commands.LoginCommand;
+import newbank.server.commands.LogoutCommand;
 import newbank.server.commands.MoveMoneyCommand;
 import newbank.server.commands.NewAccountCommand;
 import newbank.server.commands.PayCommand;
@@ -21,6 +22,7 @@ import newbank.server.commands.RegisterCommand;
 import newbank.server.commands.ShowAccountsCommand;
 import newbank.server.commands.UnknownCommand;
 import newbank.server.exceptions.CommandInvalidSyntaxException;
+
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -43,6 +45,7 @@ public class NewBankClientHandler extends Thread {
   private void initialiseSupportedCommands() {
     commands.put("DEPOSIT", DepositCommand::new);
     commands.put("LOGIN", LoginCommand::new);
+    commands.put("LOGOUT", LogoutCommand::new);
     commands.put("NEWACCOUNT", NewAccountCommand::new);
     commands.put("QUIT", QuitCommand::new);
     commands.put("REGISTER", RegisterCommand::new);
