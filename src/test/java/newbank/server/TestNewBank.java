@@ -49,8 +49,8 @@ public class TestNewBank {
   @Test
   public void canLogIn()
       throws DuplicateCustomerException, PasswordInvalidException, UsernameInvalidException {
-    bank.addCustomer("customer1", "Abc123");
+    bank.addCustomer("customer1", "Abc123456");
     assertThat(bank.checkLogInDetails("customer1", "Abc123"), nullValue());
-    assertThat(bank.checkLogInDetails("customer1", "Abc123"), not(equalTo(nullValue())));
+    assertThat(bank.checkLogInDetails("customer1", "Abc123456"), not(equalTo(nullValue())));
   }
 }
