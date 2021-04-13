@@ -375,5 +375,8 @@ public class TestApp {
 
     response = testCommand("PAY Jason 1000.0\n");
     assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
+
+    response = testCommand("DEFAULT Savings\n");
+    assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
   }
 }
