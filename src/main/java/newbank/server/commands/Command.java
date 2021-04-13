@@ -16,11 +16,21 @@ public abstract class Command {
   }
 
   public String getUsage() {
-    return String.format("SUCCESS: Usage: %s", getSyntax());
+    String syntax = getSyntax();
+    if (syntax.isEmpty()) {
+      return "No help instruction available";
+    }
+
+    return String.format("SUCCESS: Usage: %s", syntax);
   }
 
   public String getUsageInvalidSyntax() {
-    return String.format("FAIL: Usage: %s", getSyntax());
+    String syntax = getSyntax();
+    if (syntax.isEmpty()) {
+      return "FAIL: unknown syntax.";
+    }
+
+    return String.format("FAIL: Usage: %s", syntax);
   }
 
   protected void checkLoggedIn(CustomerID customer) throws RequestNotAllowedException {

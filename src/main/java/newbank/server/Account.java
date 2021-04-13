@@ -66,15 +66,15 @@ public class Account {
   }
 
   public void moveBalanceToAccount(Account destination, Money amount) throws AccountBalanceInsufficientException {
-    if (amount.isLessThan(balance)) {
+    if (balance.isLessThan(amount)) {
       throw new AccountBalanceInsufficientException(amount, balance);
     }
 
-    balance.subtract(amount);
+    balance = balance.subtract(amount);
     destination.addMoney(amount);
   }
 
   public void addMoney(Money amount) {
-    balance = balance.add(Money.of(amount.getNumber(), "GBP"));
+    balance = balance.add(amount);
   }
 }
