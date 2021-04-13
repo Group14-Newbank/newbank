@@ -18,6 +18,7 @@ import newbank.server.commands.QuitCommand;
 import newbank.server.commands.RegisterCommand;
 import newbank.server.commands.ShowAccountsCommand;
 import newbank.server.commands.UnknownCommand;
+import newbank.server.exceptions.CommandInvalidSyntaxException;
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -51,15 +52,23 @@ public class NewBankClientHandler extends Thread {
   private Command getCommand(final String name, final String[] tokens) {
     return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
   }
-
   private boolean processRequest(final String request) {
     final String[] tokens = request.trim().split("\\s+");
 
     assert (tokens.length > 0);
 
     final String commandName = tokens[0].toUpperCase();
+    final Command command = getCommand(commandName, tokens);
 
-    out.println(getCommand(commandName, tokens).execute());
+    if (tokens.length == 2 && tokens[1].equalsIgnoreCase("HELP")) {
+      out.println(command.getUsage());
+    } else {
+      try {
+        out.println(command.execute());
+      } catch(CommandInvalidSyntaxException e) {
+        out.println(command.getUsageInvalidSyntax());
+      }
+    }
 
     if (commandName.equals("QUIT")) {
       return false;

@@ -2,16 +2,17 @@ package newbank.server.commands;
 
 import org.javamoney.moneta.Money;
 
+import newbank.server.Account;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
+import newbank.server.exceptions.CommandInvalidSyntaxException;
 import newbank.server.exceptions.RequestNotAllowedException;
 
 public class DepositCommand extends Command {
   private final NewBank bank;
   private final String[] tokens;
   private final CustomerID customer;
-  private static final String DEFAULT_CURRENCY = "GBP";
 
   public DepositCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
     this.bank = bank;
@@ -24,11 +25,7 @@ public class DepositCommand extends Command {
   }
 
   @Override
-  public String execute() {
-    if ((tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP"))) {
-      return String.format("SUCCESS: Usage: %s", getSyntax());
-    }
-
+  public String execute() throws CommandInvalidSyntaxException {
     try {
       checkLoggedIn(customer);
     } catch (RequestNotAllowedException ex) {
@@ -36,7 +33,7 @@ public class DepositCommand extends Command {
     }
 
     if (tokens.length != 3) {
-      return String.format("FAIL: Usage: %s", getSyntax());
+      throw new CommandInvalidSyntaxException();
     }
 
     final String accountName = tokens[1];
@@ -49,7 +46,7 @@ public class DepositCommand extends Command {
       }
 
       bank.depositMoney(
-          customer, accountName, Money.of(amount, DEFAULT_CURRENCY));
+          customer, accountName, Money.of(amount, Account.DEFAULT_CURRENCY));
 
       return "SUCCESS: Account credited successfully.";
     } catch (NumberFormatException ex) {

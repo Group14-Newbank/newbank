@@ -28,7 +28,7 @@ public class Customer {
       if(defaultAccount.isPresent() && a == defaultAccount.get()) {
     	  s.append('*');
       }
-      
+
       s.append(a.toString());
       s.append("\n");
     }
@@ -60,13 +60,13 @@ public class Customer {
    *
    * @param accountName The account name
    * @throws AccountInvalidException if the account does not exist.
- * @throws AccountTypeInvalidException 
+ * @throws AccountTypeInvalidException
    */
   public void setDefaultAccount(final String accountName) throws AccountInvalidException, AccountTypeInvalidException {
     Optional<Account> newDefault =
         accounts.stream().filter(e -> e.getName().equalsIgnoreCase(accountName)).findFirst();
 
-    Account acc = newDefault.orElseThrow(AccountInvalidException::new);
+    Account acc = newDefault.orElseThrow(() -> new AccountInvalidException(accountName));
 
     if (Account.isSavingsAccount(accountName)) {
       throw new AccountTypeInvalidException();

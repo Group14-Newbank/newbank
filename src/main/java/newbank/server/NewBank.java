@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.javamoney.moneta.Money;
 
+import newbank.server.exceptions.AccountBalanceInsufficientException;
 import newbank.server.exceptions.AccountBalanceInvalidException;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountNameInvalidException;
@@ -182,7 +183,7 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
     Optional<Account> account = customer.getAccount(accountName);
 
-    return account.orElseThrow(AccountInvalidException::new);
+    return account.orElseThrow(() -> new AccountInvalidException(accountName));
   }
 
   /**
@@ -197,6 +198,24 @@ public class NewBank {
       throws AccountInvalidException {
 
     getAccount(customerID, accountName).addMoney(money);
+  }
+
+  /**
+   * Move customer's money from one account to another.
+   *
+   * @param customerID The customer identifier
+   * @param accountNameFrom The account name from which the money is transferred
+   * @param accountNameTo The account name to which the money is transferred
+   * @param money The amount to move
+   */
+  public synchronized void moveMoney(
+      final CustomerID customerID, final String accountNameFrom, final String accountNameTo, final Money money)
+      throws AccountInvalidException, AccountBalanceInsufficientException {
+
+    Account accountFrom = getAccount(customerID, accountNameFrom);
+    Account accountTo = getAccount(customerID, accountNameTo);
+
+    accountFrom.moveBalanceToAccount(accountTo, money);
   }
 
   /**
