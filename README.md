@@ -13,7 +13,7 @@ The architecture is a distributed 2-tier client-server application as illustrast
 ## Procotol
 
 The client and server communicates via a simple protocol.
-Please refer to [Protocol document](docs/protocol.txt) for details of the application protocols between the client and the server.
+Please refer to [Protocol document](docs/protocol.md) for details of the application protocols between the client and the server.
 
 ## Getting Started
 
