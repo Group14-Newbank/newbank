@@ -16,6 +16,8 @@ import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NewBank {
   private static final NewBank bank = new NewBank();
@@ -28,20 +30,20 @@ public class NewBank {
 
   private void addTestData() {
     try {
-      Customer bhagy = new Customer("Bhagy", "bhagy");
+      Customer bhagy = new Customer("Bhagy", "Bhagy123");
 
       bhagy.addAccount(new Account("Main", Money.of(1000, "GBP")));
       bhagy.addAccount(new Account("Savings", Money.of(201.19, "GBP")));
 
       customers.put("Bhagy", bhagy);
 
-      Customer christina = new Customer("Christina", "christina");
+      Customer christina = new Customer("Christina", "Christina123");
 
       christina.addAccount(new Account("Savings", Money.of(1500, "GBP")));
 
       customers.put("Christina", christina);
 
-      Customer john = new Customer("John", "john");
+      Customer john = new Customer("John", "John123");
 
       john.addAccount(new Account("Checking", Money.of(250, "GBP")));
 
@@ -74,9 +76,9 @@ public class NewBank {
   }
 
   // Simple algorithm to check that the password meets the security requirements
-  // must be non-empty
+  // must contain at least one number, uppercase letter and lowercase letter
   private void validatePassword(final String password) throws PasswordInvalidException {
-    if (password.isEmpty()) {
+    if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")){
       throw new PasswordInvalidException();
     }
   }
