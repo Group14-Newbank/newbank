@@ -29,7 +29,7 @@ public class DepositCommand extends Command {
     try {
       checkLoggedIn(customer);
     } catch (RequestNotAllowedException ex) {
-      return ex.getMessage();
+      return String.format("FAIL: %s", ex.getMessage());
     }
 
     if (tokens.length != 3) {
@@ -45,8 +45,7 @@ public class DepositCommand extends Command {
         return String.format("FAIL: Deposit amount [%s] invalid.", tokens[2]);
       }
 
-      bank.depositMoney(
-          customer, accountName, Money.of(amount, Account.DEFAULT_CURRENCY));
+      bank.depositMoney(customer, accountName, Money.of(amount, Account.DEFAULT_CURRENCY));
 
       return "SUCCESS: Account credited successfully.";
     } catch (NumberFormatException ex) {

@@ -65,16 +65,20 @@ public class Account {
     return balance;
   }
 
-  public void moveBalanceToAccount(Account destination, Money amount) throws AccountBalanceInsufficientException {
+  public void moveMoneyToAccount(Account destination, Money amount) throws AccountBalanceInsufficientException {
     if (balance.isLessThan(amount)) {
       throw new AccountBalanceInsufficientException(amount, balance);
     }
 
     balance = balance.subtract(amount);
-    destination.addMoney(amount);
+    destination.credit(amount);
   }
 
-  public void addMoney(Money amount) {
+  public void credit(final Money amount) {
     balance = balance.add(amount);
+  }
+
+  public void debit(final Money amount) {
+    balance = balance.subtract(amount);
   }
 }

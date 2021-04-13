@@ -10,8 +10,10 @@ import newbank.server.exceptions.AccountBalanceInvalidException;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountNameInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
+import newbank.server.exceptions.CustomerInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
+import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
 
@@ -52,6 +54,12 @@ public class NewBank {
       System.exit(1);
     } catch (AccountBalanceInvalidException e) {
       System.err.println("FAIL: Invalid balance specified.");
+      System.exit(1);
+    } catch (AccountInvalidException e) {
+      System.err.println("FAIL: Invalid account.");
+      System.exit(1);
+    } catch (AccountTypeInvalidException e) {
+      System.err.println("FAIL: Invalid default account.");
       System.exit(1);
     }
   }
@@ -183,7 +191,7 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
     Optional<Account> account = customer.getAccount(accountName);
 
-    return account.orElseThrow(() -> new AccountInvalidException(accountName));
+    return account.orElseThrow(() -> new AccountInvalidException(customer.getUsername(), accountName));
   }
 
   /**
@@ -197,7 +205,7 @@ public class NewBank {
       final CustomerID customerID, final String accountName, final Money money)
       throws AccountInvalidException {
 
-    getAccount(customerID, accountName).addMoney(money);
+    getAccount(customerID, accountName).credit(money);
   }
 
   /**
@@ -215,7 +223,7 @@ public class NewBank {
     Account accountFrom = getAccount(customerID, accountNameFrom);
     Account accountTo = getAccount(customerID, accountNameTo);
 
-    accountFrom.moveBalanceToAccount(accountTo, money);
+    accountFrom.moveMoneyToAccount(accountTo, money);
   }
 
   /**
@@ -239,9 +247,55 @@ public class NewBank {
    * @param customerID The customer identifier
    * @return true if so, false otherwise.
    */
-  public boolean hasDefaultAccount(final CustomerID customerID) {
+  public synchronized boolean hasDefaultAccount(final CustomerID customerID) {
     Customer customer = customers.get(customerID.getKey());
 
     return customer.hasDefaultAccount();
+  }
+
+  /**
+   * Credit default current account for customer identified by recipientName with the amount of
+   * money supplied.
+   *
+   * @param customerID The customer initiating the transaction
+   * @param recipientName The customer receiving the funds
+   * @param money The amount of money to credit
+   * @throws AccountInvalidException If the recipient has no default current account.
+   * @throws CustomerInvalidException If the recipient does not exist.
+   * @throws InsufficientFundsException
+   */
+  public synchronized void payCustomer(
+      final CustomerID customerID, final String recipientName, final Money money)
+      throws AccountInvalidException, CustomerInvalidException, InsufficientFundsException {
+    Optional<Customer> recipient = getCustomer(recipientName);
+
+    if (!recipient.isPresent()) {
+      throw new CustomerInvalidException();
+    }
+
+    Optional<Account> destinatorAccount = recipient.get().getDefaultAccount();
+
+    // check recipient's account
+    if (!destinatorAccount.isPresent()) {
+      throw new AccountInvalidException(recipient.get().getUsername(), "<DEFAULT>");
+    }
+
+    Customer originator = customers.get(customerID.getKey());
+
+    Optional<Account> originatorAccount = originator.getDefaultAccount();
+
+    // check originator's account
+    if (!originatorAccount.isPresent()) {
+      throw new AccountInvalidException(originator.getUsername(), "<DEFAULT>");
+    }
+
+    // check originator's funds
+    if (originatorAccount.get().getBalance().isLessThan(money)) {
+      throw new InsufficientFundsException();
+    }
+
+    // perform transaction
+    originatorAccount.get().debit(money);
+    destinatorAccount.get().credit(money);
   }
 }

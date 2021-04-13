@@ -15,6 +15,7 @@ import newbank.server.commands.DepositCommand;
 import newbank.server.commands.LoginCommand;
 import newbank.server.commands.MoveMoneyCommand;
 import newbank.server.commands.NewAccountCommand;
+import newbank.server.commands.PayCommand;
 import newbank.server.commands.QuitCommand;
 import newbank.server.commands.RegisterCommand;
 import newbank.server.commands.ShowAccountsCommand;
@@ -48,6 +49,7 @@ public class NewBankClientHandler extends Thread {
     commands.put("SHOWMYACCOUNTS", ShowAccountsCommand::new);
     commands.put("MOVE", MoveMoneyCommand::new);
     commands.put("DEFAULT", DefaultCommand::new);
+    commands.put("PAY", PayCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
   }
 

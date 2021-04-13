@@ -84,6 +84,8 @@ public class ExampleClient extends Thread {
   }
 
   public void run() {
+    displayWelcomingBanner();
+
     try {
       String command;
       while ((command = userInput.readLine()) != null) {
@@ -96,6 +98,17 @@ public class ExampleClient extends Thread {
     } catch (IOException e) {
       e.printStackTrace();
     }
+  }
+
+  private void displayWelcomingBanner() {
+    final String message =
+        " __        __   _                            _____       _   _               _                 _\r\n"
+            + " \\ \\      / /__| | ___ ___  _ __ ___   ___  |_   _|__   | \\ | | _____      _| |__   __ _ _ __ | | __\r\n"
+            + "  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\   | |/ _ \\  |  \\| |/ _ \\ \\ /\\ / / '_ \\ / _` | '_ \\| |/ /\r\n"
+            + "   \\ V  V /  __/ | (_| (_) | | | | | |  __/   | | (_) | | |\\  |  __/\\ V  V /| |_) | (_| | | | |   <\r\n"
+            + "    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|   |_|\\___/  |_| \\_|\\___| \\_/\\_/ |_.__/ \\__,_|_| |_|_|\\_\\\n";
+
+    display.writeLine(message);
   }
 
   public static void main(String[] args) {
