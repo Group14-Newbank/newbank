@@ -17,7 +17,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import newbank.client.ConfigurationException;
-import newbank.client.ExampleClient;
+import newbank.client.TestClient;
 import newbank.server.NewBankServer;
 import newbank.utils.Display;
 import newbank.utils.QueueDisplay;
@@ -28,7 +28,7 @@ public class TestApp {
   private PipedReader reader;
   private PipedWriter writer;
   private Display display;
-  private ExampleClient client;
+  private TestClient client;
 
   @Ignore
   private String testCommand(String command) throws IOException {
@@ -41,6 +41,7 @@ public class TestApp {
   @BeforeClass
   public static void beforeAll() throws IOException, InterruptedException {
     server = new NewBankServer(NewBankServer.DEFAULT_SERVER_PORT);
+    NewBankServer.VERBOSE_MODE = true;
     server.start();
   }
 
@@ -50,7 +51,7 @@ public class TestApp {
     writer = new PipedWriter(reader);
     display = new QueueDisplay();
 
-    client = new ExampleClient("localhost", NewBankServer.DEFAULT_SERVER_PORT, reader);
+    client = new TestClient("localhost", NewBankServer.DEFAULT_SERVER_PORT, reader);
     client.setDisplay(display);
     client.start();
   }

@@ -7,6 +7,7 @@ import java.net.Socket;
 public class NewBankServer extends Thread {
   public static final int DEFAULT_SERVER_PORT = 14002;
   private ServerSocket server;
+  public static boolean VERBOSE_MODE = false;
 
   public NewBankServer(int port) throws IOException {
     server = new ServerSocket(port);

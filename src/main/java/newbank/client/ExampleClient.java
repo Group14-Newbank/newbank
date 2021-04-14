@@ -8,6 +8,13 @@ import java.io.Reader;
 import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.fusesource.jansi.AnsiConsole;
+import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 import newbank.utils.ConsoleDisplay;
 import newbank.utils.Display;
@@ -20,7 +27,10 @@ public class ExampleClient extends Thread {
   private final PrintWriter bankServerOut;
   private final BufferedReader userInput;
   private final Thread bankServerResponseThread;
-  private Display display = new ConsoleDisplay();
+  protected Display display = new ConsoleDisplay();
+  private final Lock lock = new ReentrantLock();
+  private final Condition gotServerResponse = lock.newCondition();
+  private boolean gotReply = false;
 
   /**
    * @param ip an ip address, or the loopback address
@@ -44,19 +54,42 @@ public class ExampleClient extends Thread {
               String response = null;
               try {
                 response = bankServerIn.readLine();
+                gotReply = true;
+
+                if (response == null) {
+                  break; // socket broken, end thread
+                }
+
+                processResponse(response);
+
+                lock.lock();
+                gotServerResponse.signal();
               } catch (IOException e) {
                 e.printStackTrace();
-                Thread.currentThread().interrupt();
+                return;
+              } finally {
+                if (response != null) {
+                  lock.unlock();
+                }
               }
-              if (response == null) {
-                break; // socket broken, end thread
-              }
-
-              display.writeLine(response);
             }
           }
         };
     bankServerResponseThread.start();
+  }
+
+  protected void processResponse(final String response) {
+    final String[] tokens = response.trim().split(":");
+
+    if (tokens.length == 2) {
+      if (tokens[0].startsWith("SUCCESS")) {
+        display.writeLine(ansi().fg(GREEN).a("SUCCESS ").reset().a(tokens[1]).toString());
+      } else {
+        display.writeLine(ansi().fg(RED).a("FAIL ").reset().a(tokens[1]).toString());
+      }
+    } else {
+      display.writeLine(response);
+    }
   }
 
   public void setDisplay(Display display) {
@@ -84,7 +117,8 @@ public class ExampleClient extends Thread {
   }
 
   public void run() {
-    displayWelcomingBanner();
+    displayWelcomingMessage();
+    displayPrompt();
 
     try {
       String command;
@@ -92,29 +126,79 @@ public class ExampleClient extends Thread {
         bankServerOut.println(command);
 
         if (command.equals("QUIT")) {
-          break; // terminate application
+          break; // close client
         }
+
+        while (gotReply == false) {
+          lock.lock();
+          try {
+            gotServerResponse.await();
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+            return;
+          } finally {
+            lock.unlock();
+          }
+        }
+
+        displayPrompt();
+        gotReply = false;
       }
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
 
-  private void displayWelcomingBanner() {
+  protected void displayPrompt() {
+    display.write("$ ");
+  }
+
+  private void displayWelcomingMessage() {
     final String message =
         " __        __   _                            _____       _   _               _                 _\r\n"
             + " \\ \\      / /__| | ___ ___  _ __ ___   ___  |_   _|__   | \\ | | _____      _| |__   __ _ _ __ | | __\r\n"
             + "  \\ \\ /\\ / / _ \\ |/ __/ _ \\| '_ ` _ \\ / _ \\   | |/ _ \\  |  \\| |/ _ \\ \\ /\\ / / '_ \\ / _` | '_ \\| |/ /\r\n"
             + "   \\ V  V /  __/ | (_| (_) | | | | | |  __/   | | (_) | | |\\  |  __/\\ V  V /| |_) | (_| | | | |   <\r\n"
-            + "    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|   |_|\\___/  |_| \\_|\\___| \\_/\\_/ |_.__/ \\__,_|_| |_|_|\\_\\\n";
+            + "    \\_/\\_/ \\___|_|\\___\\___/|_| |_| |_|\\___|   |_|\\___/  |_| \\_|\\___| \\_/\\_/ |_.__/ \\__,_|_| |_|_|\\_\\\r\n";
 
     display.writeLine(message);
-    System.out.println("\n" + "\033[3mPlease login using the following format: \033[1m" + "\033[3mlogin username password\033[0m"
-            + "\n" + "\033[3mPlease register using the following format: \033[1m" + "\033[3mregister username password\033[0m");
+    display.writeLine(
+        ansi()
+            .fg(WHITE)
+            .a("[")
+            .reset()
+            .fg(BLUE)
+            .a("EXISTING USER")
+            .fg(WHITE)
+            .a("]")
+            .reset()
+            .a(" Please login using the following format: ")
+            .fg(CYAN)
+            .a("login username password")
+            .reset()
+            .toString());
+    display.writeLine(
+        ansi()
+            .fg(WHITE)
+            .a("[")
+            .reset()
+            .fg(BLUE)
+            .a("NEW USER")
+            .fg(WHITE)
+            .a("]")
+            .reset()
+            .a(" Please register using the following format: ")
+            .fg(CYAN)
+            .a("register username password")
+            .reset()
+            .toString());
   }
 
   public static void main(String[] args) {
     try {
+      // activate JANSI support
+      AnsiConsole.systemInstall();
+
       new ExampleClient(DEFAULT_IP, DEFAULT_PORT, new InputStreamReader(System.in)).start();
     } catch (Exception e) {
       e.printStackTrace();

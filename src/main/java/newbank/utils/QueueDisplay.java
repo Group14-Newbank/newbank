@@ -17,6 +17,11 @@ public class QueueDisplay extends Display {
       ex.printStackTrace();
     }
   }
+  
+  @Override
+  public void write(String message) {
+	  writeLine(message);
+  }
 
   @Override
   public String getLine() {

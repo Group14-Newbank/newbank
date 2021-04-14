@@ -15,8 +15,6 @@ import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class NewBank {
   private static final NewBank bank = new NewBank();
