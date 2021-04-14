@@ -6,9 +6,10 @@ import java.util.Optional;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
-import newbank.utils.Config;
+import newbank.server.microloans.UserLoanHistory;
 
 import static newbank.utils.Config.MAX_ACCOUNTS;
+import static newbank.utils.Config.MULTILINE_INFO_SEPARATOR;
 
 public class Customer {
   private String username;
@@ -31,7 +32,7 @@ public class Customer {
       }
 
       s.append(a.toString());
-      s.append(Config.MULTILINE_INFO_SEPARATOR);
+      s.append(MULTILINE_INFO_SEPARATOR);
     }
     return s.toString();
   }
@@ -105,6 +106,10 @@ public class Customer {
   /** @return true if the customer has a default current account, false otherwise. */
   public boolean hasDefaultAccount() {
     return defaultAccount.isPresent();
+  }
+
+  public UserLoanHistory getLoanHistory() {
+    return new UserLoanHistory(this);
   }
 
   @Override

@@ -4,7 +4,6 @@ import newbank.server.CustomerID;
 import newbank.server.NewBank;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +60,10 @@ public abstract class Command {
       return String.format("FAIL: Usage: %s", getSyntax());
 
     return "";
+  }
+
+  protected String noDefaultAccount() {
+    return bank.hasDefaultAccount(customerID) ? "" : "FAIL: You do not have a default account.";
   }
 
   /**

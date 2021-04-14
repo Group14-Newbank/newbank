@@ -8,21 +8,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-import newbank.server.commands.Command;
-import newbank.server.commands.CommandSupplier;
-import newbank.server.commands.DefaultCommand;
-import newbank.server.commands.DepositCommand;
-import newbank.server.commands.HelpCommand;
-import newbank.server.commands.LoginCommand;
-import newbank.server.commands.LogoutCommand;
-import newbank.server.commands.MoveMoneyCommand;
-import newbank.server.commands.NewAccountCommand;
-import newbank.server.commands.PayCommand;
-import newbank.server.commands.QuitCommand;
-import newbank.server.commands.RegisterCommand;
-import newbank.server.commands.ShowAccountsCommand;
-import newbank.server.commands.UnknownCommand;
-
+import newbank.server.commands.*;
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -53,6 +39,7 @@ public class NewBankClientHandler extends Thread {
     commands.put("MOVE", MoveMoneyCommand::new);
     commands.put("DEFAULT", DefaultCommand::new);
     commands.put("PAY", PayCommand::new);
+    commands.put("REQUESTLOAN", RequestLoanCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
     commands.put("HELP", HelpCommand::new);
   }

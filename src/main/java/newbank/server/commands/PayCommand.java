@@ -1,5 +1,6 @@
 package newbank.server.commands;
 
+import newbank.server.commands.responsibilities.SetsAmount;
 import org.javamoney.moneta.Money;
 
 import newbank.server.CustomerID;
@@ -10,15 +11,16 @@ import newbank.server.exceptions.InsufficientFundsException;
 
 import java.util.ArrayList;
 
-import static newbank.utils.Config.DEFAULT_CURRENCY;
+public class PayCommand extends Command implements SetsAmount {
+  private Money amount;
 
-public class PayCommand extends Command {
   public PayCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
     super(bank, tokens, customerID);
     responsibilityChain = new ArrayList<>();
     responsibilityChain.add(this::requestingHelp);
     responsibilityChain.add(this::mustLogIn);
     responsibilityChain.add(this::incorrectUsage);
+    responsibilityChain.add(this::invalidAmount);
   }
 
   public String getSyntax() {
@@ -31,13 +33,7 @@ public class PayCommand extends Command {
     if (!message.isEmpty()) return message;
 
     try {
-      final Double amount = Double.parseDouble(tokens[2]);
-
-      if (!(amount > 0)) {
-        return String.format("FAIL: Credit amount [%s] invalid.", tokens[2]);
-      }
-
-      bank.payCustomer(customerID, tokens[1], Money.of(amount, DEFAULT_CURRENCY));
+      bank.payCustomer(customerID, tokens[1], amount);
 
       return String.format("Default account for customer [%s] credited successfully.", tokens[1]);
     } catch (AccountInvalidException e) {
@@ -46,9 +42,23 @@ public class PayCommand extends Command {
     } catch (CustomerInvalidException e) {
       return String.format("FAIL: Customer [%s] does not exist.", tokens[1]);
     } catch (InsufficientFundsException e) {
-      return String.format("FAIL: Insufficient funds to perform transaction.");
-    } catch (NumberFormatException e) {
-      return String.format("FAIL: Credit amount [%s] invalid.", tokens[2]);
+      return "FAIL: Insufficient funds to perform transaction.";
     }
+  }
+
+  //////////////////////////// SetsAmount overrides ////////////////////////////
+  @Override
+  public void setAmount(Money amount) {
+    this.amount = amount;
+  }
+
+  @Override
+  public String getAmountInput() {
+    return tokens[2];
+  }
+
+  @Override
+  public String getAmountName() {
+    return "Credit";
   }
 }
