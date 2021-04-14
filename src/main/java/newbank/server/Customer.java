@@ -77,7 +77,7 @@ public class Customer {
     Optional<Account> newDefault =
         accounts.stream().filter(e -> e.getName().equalsIgnoreCase(accountName)).findFirst();
 
-    Account acc = newDefault.orElseThrow(() -> new AccountInvalidException(username));
+    Account acc = newDefault.orElseThrow(() -> new AccountInvalidException(username, accountName));
 
     if (Account.isSavingsAccount(accountName)) {
       throw new AccountTypeInvalidException();

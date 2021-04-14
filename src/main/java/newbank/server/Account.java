@@ -2,6 +2,7 @@ package newbank.server;
 
 import org.javamoney.moneta.Money;
 
+import newbank.server.exceptions.AccountBalanceInsufficientException;
 import newbank.server.exceptions.AccountBalanceInvalidException;
 import newbank.server.exceptions.AccountNameInvalidException;
 
@@ -18,6 +19,7 @@ public class Account {
 
   public static final int MIN_NAME_LENGTH = 4;
   public static final int MAX_NAME_LENGTH = 12;
+  public static final String DEFAULT_CURRENCY = "GBP";
 
   public Account(final String accountName, final Money openingBalance)
       throws AccountBalanceInvalidException, AccountNameInvalidException {
@@ -61,6 +63,16 @@ public class Account {
 
   public Money getBalance() {
     return balance;
+  }
+
+  public void moveMoneyToAccount(Account destination, Money amount)
+      throws AccountBalanceInsufficientException {
+    if (balance.isLessThan(amount)) {
+      throw new AccountBalanceInsufficientException(amount, balance);
+    }
+
+    debit(amount);
+    destination.credit(amount);
   }
 
   public void credit(final Money amount) {

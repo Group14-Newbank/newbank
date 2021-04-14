@@ -13,12 +13,14 @@ import newbank.server.commands.CommandSupplier;
 import newbank.server.commands.DefaultCommand;
 import newbank.server.commands.DepositCommand;
 import newbank.server.commands.LoginCommand;
+import newbank.server.commands.MoveMoneyCommand;
 import newbank.server.commands.NewAccountCommand;
 import newbank.server.commands.PayCommand;
 import newbank.server.commands.QuitCommand;
 import newbank.server.commands.RegisterCommand;
 import newbank.server.commands.ShowAccountsCommand;
 import newbank.server.commands.UnknownCommand;
+import newbank.server.exceptions.CommandInvalidSyntaxException;
 
 /** The NewBankClientHandler handles all clients requests. */
 public class NewBankClientHandler extends Thread {
@@ -45,9 +47,28 @@ public class NewBankClientHandler extends Thread {
     commands.put("QUIT", QuitCommand::new);
     commands.put("REGISTER", RegisterCommand::new);
     commands.put("SHOWMYACCOUNTS", ShowAccountsCommand::new);
+    commands.put("MOVE", MoveMoneyCommand::new);
     commands.put("DEFAULT", DefaultCommand::new);
     commands.put("PAY", PayCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
+  }
+
+  private void handleCommandHelp(final Command command) {
+    String syntax = command.getSyntax();
+    if (syntax.isEmpty()) {
+      out.println("No help instruction available");
+    } else {
+      out.format("SUCCESS: Usage: %s\n", syntax);
+    }
+  }
+
+  private void handleCommandInvalidSyntax(final Command command) {
+    String syntax = command.getSyntax();
+    if (syntax.isEmpty()) {
+      out.println("FAIL: unknown syntax.");
+    } else {
+      out.format("FAIL: Usage: %s\n", syntax);
+    }
   }
 
   private Command getCommand(final String name, final String[] tokens) {
@@ -60,8 +81,18 @@ public class NewBankClientHandler extends Thread {
     assert (tokens.length > 0);
 
     final String commandName = tokens[0].toUpperCase();
+    final Command command = getCommand(commandName, tokens);
 
-    out.println(getCommand(commandName, tokens).execute());
+    if (tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP")) {
+      handleCommandHelp(command);
+      return true;
+    }
+
+    try {
+      out.println(command.execute());
+    } catch (CommandInvalidSyntaxException e) {
+      handleCommandInvalidSyntax(command);
+    }
 
     if (commandName.equals("QUIT")) {
       return false;

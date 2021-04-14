@@ -21,7 +21,7 @@ public class PayCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "PAY <person> <amount>";
   }
 

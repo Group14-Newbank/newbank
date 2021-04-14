@@ -3,6 +3,7 @@ package newbank.server.commands;
 import newbank.server.Account;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
+import newbank.server.exceptions.CommandInvalidSyntaxException;
 import newbank.server.exceptions.RequestNotAllowedException;
 
 public class NewAccountCommand extends Command {
@@ -16,7 +17,7 @@ public class NewAccountCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "NEWACCOUNT <Name> [Default]";
   }
 
@@ -25,12 +26,12 @@ public class NewAccountCommand extends Command {
   }
 
   @Override
-  public String execute() {
+  public String execute() throws CommandInvalidSyntaxException {
     try {
       checkLoggedIn(customer);
 
       if (!(tokens.length >= 2)) {
-        return String.format("FAIL: Usage: %s", getSyntax());
+        throw new CommandInvalidSyntaxException();
       }
 
       boolean isDefault = false;
@@ -38,7 +39,7 @@ public class NewAccountCommand extends Command {
 
       if (tokens.length == 3) {
         if (!tokens[2].equalsIgnoreCase("DEFAULT")) {
-          return String.format("FAIL: Usage: %s", getSyntax());
+          throw new CommandInvalidSyntaxException();
         }
 
         isDefault = true;

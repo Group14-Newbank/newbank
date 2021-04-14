@@ -4,6 +4,7 @@ import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
+import newbank.server.exceptions.CommandInvalidSyntaxException;
 import newbank.server.exceptions.RequestNotAllowedException;
 
 public class DefaultCommand extends Command {
@@ -17,17 +18,17 @@ public class DefaultCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "DEFAULT <Name>";
   }
 
   @Override
-  public String execute() {
+  public String execute() throws CommandInvalidSyntaxException {
     try {
       checkLoggedIn(customer);
 
       if (!(tokens.length == 2)) {
-        return String.format("Usage: %s", getSyntax());
+        throw new CommandInvalidSyntaxException();
       }
 
       final String accountName = tokens[1];
