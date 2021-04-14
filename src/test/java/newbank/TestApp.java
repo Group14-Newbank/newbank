@@ -10,6 +10,8 @@ import static org.hamcrest.Matchers.not;
 import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.javamoney.moneta.Money;
@@ -29,6 +31,8 @@ import newbank.server.NewBank;
 import newbank.server.NewBankServer;
 import newbank.utils.Display;
 import newbank.utils.QueueDisplay;
+import newbank.server.Customer;
+import newbank.server.microloans.Loans;
 
 public class TestApp {
   private static NewBankServer server;
@@ -86,6 +90,16 @@ public class TestApp {
     String[] output = result.split(":");
     assertThat(output[0].trim(), equalTo(account));
     assertThat(output[1].trim(), equalTo(balance));
+  }
+
+  private <T> T getAndAssertOptional(Supplier<Optional<T>> supplier) {
+    Optional<T> opt = supplier.get();
+    assertThat(opt.isPresent(), equalTo(true));
+    return opt.get();
+  }
+  
+  private Customer getCustomer(final String username) {
+    return getAndAssertOptional(() -> NewBank.getBank().getCustomer(username));
   }
 
   void testShowMyAccountsOutput(String[] patterns) throws IOException {
@@ -407,8 +421,7 @@ public class TestApp {
     ));
     assertThat(response, containsString("SUCCESS"));
     assertThat("The user now has 1 loan-request", 
-        NewBank.getBank().getCustomer(username).get()
-            .getLoanHistory().hasCurrentLoanRequest()
+        getCustomer(username).getLoanHistory().hasCurrentLoanRequest()
     );
     
     response = testCommand("REQUESTLOAN 100 60\n");
@@ -455,4 +468,83 @@ public class TestApp {
   
   // TODO cannotRequestMicroloanWhenAlreadyHave3
   // TODO cannotRequestMicroloanWhenDefaultedInPast
+
+  private String createLoanRequest(String uniqueUsername) throws IOException {
+    setupCustomerWithAccount(uniqueUsername, "Password0", "Main");
+    String response = testCommand(String.format(
+        "REQUESTLOAN %s %s\n", MAX_MICROLOAN.getNumber().toString(), MAX_REPAYMENT_PERIOD_DAYS
+    ));
+    assertThat(response, containsString("SUCCESS"));
+    return uniqueUsername;
+  }
+
+  @Test
+  public void canGrantLoanRequestExactlyOnce() throws IOException {
+    String borrowerName = "canGrantLoanRequestBorrower";
+    String loanID = createLoanRequest(borrowerName);
+
+    String response = testCommand("LOGOUT\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    String lenderName = "canGrantLoanRequestLender";
+    setupCustomerWithAccount(lenderName, "Password0", "Main");
+    response = testCommand("DEPOSIT main 1000\n");
+    assertThat(response, containsString("SUCCESS"));
+
+    Customer borrower = getCustomer(borrowerName);
+    Customer lender = getCustomer(lenderName);
+    Money borrowerBalanceBefore =
+        getAndAssertOptional(borrower::getDefaultAccount).getBalance();
+    Money lenderBalanceBefore =
+        getAndAssertOptional(lender::getDefaultAccount).getBalance();
+
+    response = testCommand(String.format("GRANTLOAN %s\n", loanID));
+    assertThat(response, containsString("SUCCESS"));
+
+    assertThat(new Loans().getCredits(lender).count(), equalTo(1L));
+    assertThat(borrower.getLoanHistory().currentDebtCount(), equalTo(1));
+    assertThat(borrower.getLoanHistory().hasCurrentLoanRequest(), equalTo(false));
+
+    // Accounts have been credited and debited
+    assertThat(getAndAssertOptional(borrower::getDefaultAccount).getBalance(),
+        equalTo(borrowerBalanceBefore.add(MAX_MICROLOAN)));
+    assertThat(getAndAssertOptional(lender::getDefaultAccount).getBalance(),
+        equalTo(lenderBalanceBefore.subtract(MAX_MICROLOAN)));
+
+    // Cannot grant a request that's already been accepted
+    response = testCommand(String.format("GRANTLOAN %s\n", loanID));
+    assertThat(response, matchesPattern("FAIL:.+not found.*"));
+  }
+
+  @Test
+  public void cannotGrantMyOwnLoanRequest() throws IOException {
+    String loanID = createLoanRequest("cantGrantOwn");
+    String response = testCommand(String.format("GRANTLOAN %s\n", loanID));
+    assertThat(response, matchesPattern("FAIL:.+your own.*"));
+  }
+
+  @Test
+  public void cannotGrantNonexistentLoanRequest() throws IOException {
+    setupCustomerWithAccount("cantGrantNon", "Password0");
+    String response = testCommand("GRANTLOAN nonsenseID\n");
+    assertThat(response, matchesPattern("FAIL:.+not found.*"));
+  }
+
+  @Test void cannotGrantRequestWithoutDefaultAccount() throws IOException {
+    String loanID = createLoanRequest("cannotGrantRequestWithoutDefaultAccount");
+    String response = logIn("Christina", "Christina123");
+    assertThat(response, containsString("SUCCESS"));
+
+    response = testCommand(String.format("GRANTLOAN %s\n", loanID)).toLowerCase();
+    assertThat(response, matchesPattern("fail:.+default.+"));
+  }
+
+  @Test void cannotGrantRequestWithInsufficientFunds() throws IOException {
+    String loanID = createLoanRequest("cannotGrantRequestWithInsufficientFunds");
+    String response = logIn("John", "John123");
+    assertThat(response, containsString("SUCCESS"));
+
+    response = testCommand(String.format("GRANTLOAN %s\n", loanID)).toLowerCase();
+    assertThat(response, matchesPattern("fail:.+insufficient funds.+"));
+  }
 }
