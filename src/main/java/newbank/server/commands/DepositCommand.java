@@ -5,13 +5,12 @@ import org.javamoney.moneta.Money;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
+import newbank.server.commands.responsibilities.SetsAmount;
 
 import java.util.ArrayList;
 
-import static newbank.utils.Config.DEFAULT_CURRENCY;
-
-public class DepositCommand extends Command {
-  double amount;
+public class DepositCommand extends Command implements SetsAmount {
+  Money amount;
 
   public DepositCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
     super(bank, tokens, customerID);
@@ -34,7 +33,7 @@ public class DepositCommand extends Command {
     final String accountName = tokens[1];
 
     try {
-      bank.depositMoney(customerID, accountName, Money.of(amount, DEFAULT_CURRENCY));
+      bank.depositMoney(customerID, accountName, amount);
     } catch (AccountInvalidException ex) {
       return String.format("FAIL: Account [%s] does not exist.", accountName);
     }
@@ -42,18 +41,19 @@ public class DepositCommand extends Command {
     return "SUCCESS: Account credited successfully.";
   }
 
-  /**
-   * Raises a failure message if the requested amount is inappropriate and sets the `amount` field
-   */
-  private String invalidAmount() {
-    try {
-      amount = Double.parseDouble(tokens[2]);
-    } catch (NumberFormatException ex) {
-      return String.format("FAIL: Deposit amount [%s] invalid.", tokens[2]);
-    }
+  //////////////////////////// SetsAmount overrides ////////////////////////////
+  @Override
+  public void setAmount(Money amount) {
+    this.amount = amount;
+  }
 
-    if (amount > 0) return "";
+  @Override
+  public String getAmountInput() {
+    return tokens[2];
+  }
 
-    return String.format("FAIL: Deposit amount [%s] invalid.", tokens[2]);
+  @Override
+  public String getAmountName() {
+    return "Deposit";
   }
 }

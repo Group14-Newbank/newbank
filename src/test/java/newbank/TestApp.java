@@ -1,6 +1,6 @@
 package newbank;
 
-import static newbank.utils.Config.DEFAULT_PORT;
+import static newbank.utils.Config.*;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,17 +10,23 @@ import static org.hamcrest.Matchers.not;
 import java.io.IOException;
 import java.io.PipedReader;
 import java.io.PipedWriter;
+import java.util.stream.Stream;
+
+import org.javamoney.moneta.Money;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import newbank.client.ConfigurationException;
 import newbank.client.TestClient;
+import newbank.server.NewBank;
 import newbank.server.NewBankServer;
-import newbank.utils.Config;
 import newbank.utils.Display;
 import newbank.utils.QueueDisplay;
 
@@ -73,7 +79,7 @@ public class TestApp {
 
   private void checkAccountBalance(final String account, final String balance) throws IOException {
     String result = testCommand("SHOWMYACCOUNTS\n");
-    String[] info = result.split(Config.MULTILINE_INFO_SEPARATOR);
+    String[] info = result.split(MULTILINE_INFO_SEPARATOR);
     assertThat(info.length, equalTo(2));
 
     result = info[1];
@@ -84,7 +90,7 @@ public class TestApp {
 
   void testShowMyAccountsOutput(String[] patterns) throws IOException {
     String accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    String[] outputLines = accountSummary.split(Config.MULTILINE_INFO_SEPARATOR);
+    String[] outputLines = accountSummary.split(MULTILINE_INFO_SEPARATOR);
     assertThat(outputLines.length, equalTo(patterns.length + 1));
 
     for (int i = 0; i < patterns.length; i++) {
@@ -160,13 +166,16 @@ public class TestApp {
     assertThat(response, equalTo("FAIL: Insufficient balance in [Savings], missing: [GBP 0.01]."));
 
     response = testCommand("MOVE Savings Main -120.23\n");
-    assertThat(response, equalTo("FAIL: The amount must be a positive number: [-120.23]."));
+    assertThat(response, equalTo("FAIL: Transfer amount [-120.23] must be greater than 0."));
 
     response = testCommand("MOVE Savings Main 0\n");
-    assertThat(response, equalTo("FAIL: The amount must be a positive number: [0]."));
+    assertThat(response, equalTo("FAIL: Transfer amount [0] must be greater than 0."));
 
     response = testCommand("MOVE Savings Main t123\n");
-    assertThat(response, equalTo("FAIL: The specified amount is invalid: [t123]."));
+    assertThat(response, equalTo("FAIL: Transfer amount [t123] is invalid."));
+
+    response = testCommand("MOVE Savings Main 100.001\n");
+    assertThat(response, containsString("FAIL: Transfer amount [100.001] has more decimal places"));
 
     response = testCommand("MOVE Savings MyMain 99\n");
     assertThat(response, equalTo("FAIL: Account [MyMain] does not exist."));
@@ -226,15 +235,20 @@ public class TestApp {
     assertThat(response, containsString("SUCCESS"));
   }
 
-  private void setupCustomerWithAccount(final String username, final String password)
-      throws IOException {
+  private void setupCustomerWithAccount(
+      final String username, final String password, final String accountName
+  ) throws IOException {
     addCustomer(username, password);
 
     String response = logIn(username, password);
     assertThat(response, containsString("SUCCESS"));
 
-    response = testCommand("NEWACCOUNT Savings\n");
+    response = testCommand(String.format("NEWACCOUNT %s\n", accountName));
     assertThat(response, containsString("SUCCESS"));
+  }
+
+  private void setupCustomerWithAccount(final String username, final String password) throws IOException {
+    setupCustomerWithAccount(username, password, "Savings");
   }
 
   @Test
@@ -359,7 +373,10 @@ public class TestApp {
     assertThat(response, containsString("SUCCESS"));
 
     response = testCommand("PAY John -100.0\n");
-    assertThat(response, containsString("FAIL: Credit amount [-100.0] invalid."));
+    assertThat(response, containsString("FAIL: Credit amount [-100.0] must be greater than 0"));
+
+    response = testCommand("PAY John 100.001\n");
+    assertThat(response, containsString("FAIL: Credit amount [100.001] has more decimal places"));
   }
 
   @Test
@@ -379,4 +396,63 @@ public class TestApp {
     response = testCommand("DEFAULT Savings\n");
     assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
   }
+
+  @Test
+  public void canRequestExactlyOneMicroloan() throws IOException {
+    final String username = "canRequestExactlyOneMicroloan";
+    setupCustomerWithAccount(username, "Password0", "Main");
+
+    String response = testCommand(String.format(
+        "REQUESTLOAN %s %s\n", MAX_MICROLOAN.getNumber().toString(), MAX_REPAYMENT_PERIOD_DAYS
+    ));
+    assertThat(response, containsString("SUCCESS"));
+    assertThat("The user now has 1 loan-request", 
+        NewBank.getBank().getCustomer(username).get()
+            .getLoanHistory().hasCurrentLoanRequest()
+    );
+    
+    response = testCommand("REQUESTLOAN 100 60\n");
+    assertThat(response, matchesPattern("FAIL:.+already.+request"));
+  }
+
+  private static Stream<Arguments> badLoanRequestParams() {
+    return Stream.of(
+        Arguments.of("term.+invalid", "100", "years?"),
+        Arguments.of("term.+invalid", "100", "0"),
+        Arguments.of("term.+exceeds maximum", "100", Integer.toString(MAX_REPAYMENT_PERIOD_DAYS + 1)),
+        Arguments.of("loan.+invalid", "money", "365"),
+        Arguments.of("loan.+decimal places", "100.001", "365"),
+        Arguments.of("loan.+0", "0", "365"),
+        Arguments.of(
+            "loan.+exceeds maximum",
+            MAX_MICROLOAN.add(Money.of(1, MAX_MICROLOAN.getCurrency())).getNumber().toString(),
+            "365"
+        )
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("badLoanRequestParams")
+  public void invalidMicroloanRequestFails(String failReason, String amount, String term) throws IOException {
+    int hash = Math.abs(String.format("%s#%s#%s", failReason, amount, term).hashCode());
+    setupCustomerWithAccount(
+        String.format("TestCustomer%d", hash),
+        String.format("Password%d", hash),
+        "Main"
+    );
+
+    String response = testCommand(String.format("REQUESTLOAN %s %s\n", amount, term)).toLowerCase();
+    assertThat(response, matchesPattern(String.format("fail:.+%s.+", failReason)));
+  }
+
+  @Test
+  public void cannotRequestLoanWithoutDefaultAccount() throws IOException {
+    setupCustomerWithAccount("cannotRequestLoanWithoutDefaultAccount", "Pw1");
+
+    String response = testCommand("REQUESTLOAN 100 365\n").toLowerCase();
+    assertThat(response, matchesPattern("fail:.+default.+"));
+  }
+  
+  // TODO cannotRequestMicroloanWhenAlreadyHave3
+  // TODO cannotRequestMicroloanWhenDefaultedInPast
 }
