@@ -1,13 +1,13 @@
 package newbank.server.commands;
 
 import newbank.server.commands.responsibilities.SetsAmount;
+import newbank.server.exceptions.AccountBalanceInsufficientException;
 import org.javamoney.moneta.Money;
 
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.CustomerInvalidException;
-import newbank.server.exceptions.InsufficientFundsException;
 
 import java.util.ArrayList;
 
@@ -41,8 +41,8 @@ public class PayCommand extends Command implements SetsAmount {
           "FAIL: No default current account found for customer [%s].", e.getOwner());
     } catch (CustomerInvalidException e) {
       return String.format("FAIL: Customer [%s] does not exist.", tokens[1]);
-    } catch (InsufficientFundsException e) {
-      return "FAIL: Insufficient funds to perform transaction.";
+    } catch (AccountBalanceInsufficientException e) {
+      return e.getMessage();
     }
   }
 

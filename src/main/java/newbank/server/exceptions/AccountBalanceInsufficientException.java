@@ -1,5 +1,6 @@
 package newbank.server.exceptions;
 
+import newbank.server.Account;
 import org.javamoney.moneta.Money;
 
 public class AccountBalanceInsufficientException extends Exception {
@@ -7,10 +8,19 @@ public class AccountBalanceInsufficientException extends Exception {
 
   private Money requiredBalance;
   private Money currentBalance;
+  private final String accountName;
 
-  public AccountBalanceInsufficientException(Money requiredBalance, Money currentBalance) {
+  public AccountBalanceInsufficientException(Money requiredBalance, Account account) {
     this.requiredBalance = requiredBalance;
-    this.currentBalance = currentBalance;
+    this.currentBalance = account.getBalance();
+    this.accountName = account.getName();
+  }
+  
+  public String getMessage() {
+    return String.format(
+        "FAIL: Insufficient funds in [%s], missing: [%s].",
+        accountName, getMissingBalance()
+    );
   }
 
   public Money getRequiredBalance() {

@@ -13,7 +13,6 @@ import newbank.server.exceptions.AccountTypeInvalidException;
 import newbank.server.exceptions.CustomerInvalidException;
 import newbank.server.exceptions.CustomerMaxAccountsException;
 import newbank.server.exceptions.DuplicateCustomerException;
-import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
 
@@ -269,11 +268,11 @@ public class NewBank {
    * @param money The amount of money to credit
    * @throws AccountInvalidException If the recipient has no default current account.
    * @throws CustomerInvalidException If the recipient does not exist.
-   * @throws InsufficientFundsException
+   * @throws AccountBalanceInsufficientException If the sender's account doesn't have sufficient balance.
    */
   public synchronized void payCustomer(
       final CustomerID customerID, final String recipientName, final Money money)
-      throws AccountInvalidException, CustomerInvalidException, InsufficientFundsException {
+      throws AccountInvalidException, CustomerInvalidException, AccountBalanceInsufficientException {
     Optional<Customer> recipient = getCustomer(recipientName);
 
     if (!recipient.isPresent()) {
@@ -298,7 +297,7 @@ public class NewBank {
 
     // check originator's funds
     if (originatorAccount.get().getBalance().isLessThan(money)) {
-      throw new InsufficientFundsException();
+      throw new AccountBalanceInsufficientException(money, originatorAccount.get());
     }
 
     // perform transaction
