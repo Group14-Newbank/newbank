@@ -4,15 +4,15 @@ import newbank.server.Customer;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.commands.responsibilities.SetsAmount;
+import newbank.server.commands.responsibilities.SetsCustomer;
 import newbank.server.microloans.LoanRequest;
 import org.javamoney.moneta.Money;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 import static newbank.utils.Config.*;
 
-public class RequestLoanCommand extends Command implements SetsAmount {
+public class RequestLoanCommand extends Command implements SetsAmount, SetsCustomer {
   Money amount;
   int repaymentTerm;
   Customer customer;
@@ -23,7 +23,9 @@ public class RequestLoanCommand extends Command implements SetsAmount {
     responsibilityChain.add(this::requestingHelp);
     responsibilityChain.add(this::mustLogIn);
     responsibilityChain.add(this::incorrectUsage);
-    responsibilityChain.add(this::setCustomer);
+    responsibilityChain.add(this::retrieveCustomer);
+    responsibilityChain.add(this::hasDefaultedPreviously);
+    responsibilityChain.add(this::alreadyHas3Loans);
     responsibilityChain.add(this::alreadyRequestedLoan);
     responsibilityChain.add(this::invalidAmount);
     responsibilityChain.add(this::amountTooLarge);
@@ -47,13 +49,14 @@ public class RequestLoanCommand extends Command implements SetsAmount {
     return "SUCCESS: Loan request submitted.";
   }
 
-  protected String setCustomer() {
-    Optional<Customer> optCustomer = bank.getCustomer(customerID.getKey());
-    if (!optCustomer.isPresent())
-      return "Customer information could not be found. Please try again later.";
+  private String hasDefaultedPreviously() {
+    if (!customer.getLoanHistory().hasDefaultedOnADebt()) return "";
+    return "FAIL: You may not request or accept a microloan because you have defaulted on one in the past";
+  }
 
-    customer = optCustomer.get();
-    return "";
+  private String alreadyHas3Loans() {
+    if (customer.getLoanHistory().currentDebtCount() < 3) return "";
+    return "FAIL: You may not request of accept a microloan because you may not be the recipient of more than 3.";
   }
 
   private String alreadyRequestedLoan() {
@@ -111,5 +114,21 @@ public class RequestLoanCommand extends Command implements SetsAmount {
   @Override
   public String getAmountName() {
     return "Loan";
+  }
+
+  ///////////////////////// SetsCustomer overrides ////////////////////////////
+  @Override
+  public void setCustomer(Customer customer) {
+    this.customer = customer;
+  }
+
+  @Override
+  public CustomerID getCustomerID() {
+    return customerID;
+  }
+
+  @Override
+  public NewBank getBank() {
+    return bank;
   }
 }

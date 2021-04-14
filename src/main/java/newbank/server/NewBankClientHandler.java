@@ -40,6 +40,7 @@ public class NewBankClientHandler extends Thread {
     commands.put("DEFAULT", DefaultCommand::new);
     commands.put("PAY", PayCommand::new);
     commands.put("REQUESTLOAN", RequestLoanCommand::new);
+    commands.put("GRANTLOAN", GrantLoanCommand::new);
     commands.put("UNKNOWN", UnknownCommand::new);
     commands.put("HELP", HelpCommand::new);
   }

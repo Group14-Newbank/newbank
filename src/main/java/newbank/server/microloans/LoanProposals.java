@@ -4,6 +4,7 @@ import newbank.server.Customer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class LoanProposals {
@@ -19,6 +20,12 @@ public class LoanProposals {
 
   public Stream<LoanRequest> getRequests(Customer customer) {
     return proposalSource.getRequests(customer);
+  }
+
+  public Optional<LoanRequest> getCurrentRequest(String id) {
+    return proposalSource.getRequests()
+        .filter(request -> request.getID().equals(id) && request.isCurrent())
+        .findFirst();
   }
   
   public void addProposal(LoanProposal proposal) {
