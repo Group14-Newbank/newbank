@@ -7,18 +7,18 @@ import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.CustomerInvalidException;
 import newbank.server.exceptions.InsufficientFundsException;
-import newbank.server.exceptions.RequestNotAllowedException;
+
+import java.util.ArrayList;
+
+import static newbank.utils.Config.DEFAULT_CURRENCY;
 
 public class PayCommand extends Command {
-  private final NewBank bank;
-  private final String[] tokens;
-  private final CustomerID customer;
-  private static final String DEFAULT_CURRENCY = "GBP";
-
-  public PayCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.bank = bank;
-    this.tokens = tokens;
-    this.customer = customer;
+  public PayCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
+    super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::mustLogIn);
+    responsibilityChain.add(this::incorrectUsage);
   }
 
   public String getSyntax() {
@@ -27,28 +27,19 @@ public class PayCommand extends Command {
 
   @Override
   public String execute() {
-    if ((tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP"))) {
-      return String.format("SUCCESS: Usage: %s", getSyntax());
-    }
-
-    if (tokens.length != 3) {
-      return String.format("FAIL: Usage: %s", getSyntax());
-    }
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
 
     try {
-      checkLoggedIn(customer);
-
       final Double amount = Double.parseDouble(tokens[2]);
 
       if (!(amount > 0)) {
         return String.format("FAIL: Credit amount [%s] invalid.", tokens[2]);
       }
 
-      bank.payCustomer(customer, tokens[1], Money.of(amount, DEFAULT_CURRENCY));
+      bank.payCustomer(customerID, tokens[1], Money.of(amount, DEFAULT_CURRENCY));
 
       return String.format("Default account for customer [%s] credited successfully.", tokens[1]);
-    } catch (RequestNotAllowedException ex) {
-      return String.format("FAIL: %s", ex.getMessage());
     } catch (AccountInvalidException e) {
       return String.format(
           "FAIL: No default current account found for customer [%s].", e.getOwner());

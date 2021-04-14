@@ -4,18 +4,17 @@ import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.server.exceptions.AccountInvalidException;
 import newbank.server.exceptions.AccountTypeInvalidException;
-import newbank.server.exceptions.CommandInvalidSyntaxException;
-import newbank.server.exceptions.RequestNotAllowedException;
+
+import java.util.ArrayList;
 
 public class DefaultCommand extends Command {
-  private final NewBank bank;
-  private final String[] tokens;
-  private final CustomerID customer;
 
-  public DefaultCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.bank = bank;
-    this.tokens = tokens;
-    this.customer = customer;
+  public DefaultCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
+    super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::mustLogIn);
+    responsibilityChain.add(this::incorrectUsage);
   }
 
   public String getSyntax() {
@@ -23,25 +22,17 @@ public class DefaultCommand extends Command {
   }
 
   @Override
-  public String execute() throws CommandInvalidSyntaxException {
+  public String execute() {
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
+    final String accountName = tokens[1];
     try {
-      checkLoggedIn(customer);
-
-      if (!(tokens.length == 2)) {
-        throw new CommandInvalidSyntaxException();
-      }
-
-      final String accountName = tokens[1];
-      bank.setDefaultAccount(customer, accountName);
-
-      return String.format("SUCCESS: Account [%s] set as default.", accountName);
-
-    } catch (RequestNotAllowedException ex) {
-      return String.format("FAIL: %s", ex.getMessage());
+      bank.setDefaultAccount(customerID, accountName);
     } catch (AccountInvalidException ex) {
       return String.format("FAIL: Account [%s] does not exist.", tokens[1]);
     } catch (AccountTypeInvalidException ex) {
       return String.format("FAIL: Account [%s] cannot be default.", tokens[1]);
     }
+    return String.format("SUCCESS: Account [%s] set as default.", accountName);
   }
 }

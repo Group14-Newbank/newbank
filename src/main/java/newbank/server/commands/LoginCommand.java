@@ -3,38 +3,35 @@ package newbank.server.commands;
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
 
-public class LoginCommand extends Command {
-  private final NewBank bank;
-  private final String[] tokens;
-  private final CustomerID customer;
+import java.util.ArrayList;
 
-  public LoginCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.bank = bank;
-    this.tokens = tokens;
-    this.customer = customer;
+public class LoginCommand extends Command {
+
+  public LoginCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
+    super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::incorrectUsage);
   }
 
   @Override
   public String execute() {
-    String username = "";
-    String password = "";
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
 
-    if (tokens.length >= 2) {
-      username = tokens[1];
-    }
-    if (tokens.length >= 3) {
-      password = tokens[2];
-    }
-
+    String username = tokens[1];
+    String password = tokens[2];
     CustomerID tempCustomer = bank.checkLogInDetails(username, password);
 
-    if (tempCustomer != null) {
-      // store customerID
-      customer.setKey(tempCustomer.getKey());
+    if (tempCustomer == null) return "FAIL: Log In Failed";
 
-      return "SUCCESS: Log In Successful";
-    } else {
-      return "FAIL: Log In Failed";
-    }
+    // store customerID
+    customerID.setKey(tempCustomer.getKey());
+    return "SUCCESS: Log In Successful";
+  }
+  
+  @Override
+  public String getSyntax() {
+    return "LOGIN <username> <password>";
   }
 }
