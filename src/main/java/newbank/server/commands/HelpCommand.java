@@ -4,11 +4,26 @@ import newbank.server.CustomerID;
 import newbank.server.NewBank;
 import newbank.utils.Config;
 
+import java.util.ArrayList;
+
 public class HelpCommand extends Command {
-  public HelpCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {}
+  public HelpCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
+    super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::incorrectUsage);
+  }
+
+  @Override
+  public String getSyntax() {
+    return "HELP";
+  }
 
   @Override
   public String execute() {
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
+
     return new StringBuilder()
         .append("SUCCESS: ")
         .append(Config.MULTILINE_INFO_SEPARATOR)

@@ -2,16 +2,17 @@ package newbank.server.commands;
 
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
-import newbank.server.exceptions.CommandInvalidSyntaxException;
-import newbank.server.exceptions.RequestNotAllowedException;
+
+import java.util.ArrayList;
 
 public class LogoutCommand extends Command {
-  private final String[] tokens;
-  private final CustomerID customer;
 
-  public LogoutCommand(final NewBank bank, final String[] tokens, final CustomerID customer) {
-    this.tokens = tokens;
-    this.customer = customer;
+  public LogoutCommand(final NewBank bank, final String[] tokens, final CustomerID customerID) {
+    super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::mustLogIn);
+    responsibilityChain.add(this::incorrectUsage);
   }
 
   @Override
@@ -20,19 +21,11 @@ public class LogoutCommand extends Command {
   }
 
   @Override
-  public String execute() throws CommandInvalidSyntaxException {
+  public String execute() {
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
 
-    if (!(tokens.length == 1)) {
-      throw new CommandInvalidSyntaxException();
-    }
-
-    try {
-      checkLoggedIn(customer);
-    } catch (RequestNotAllowedException e) {
-      return String.format("FAIL: %s", e.getMessage());
-    }
-
-    customer.setKey("");
+    customerID.setKey("");
     return "SUCCESS: You have been logged out successfully.";
   }
 }

@@ -2,25 +2,31 @@ package newbank.server.commands;
 
 import newbank.server.CustomerID;
 import newbank.server.NewBank;
-import newbank.server.exceptions.RequestNotAllowedException;
 import newbank.utils.Config;
 
-public class ShowAccountsCommand extends Command {
-  private final NewBank bank;
-  private final CustomerID customer;
+import java.util.ArrayList;
 
-  public ShowAccountsCommand(final NewBank bank, final String[] tokens, CustomerID customer) {
-    this.bank = bank;
-    this.customer = customer;
+public class ShowAccountsCommand extends Command {
+
+  public ShowAccountsCommand(final NewBank bank, final String[] tokens, CustomerID customerID) {
+      super(bank, tokens, customerID);
+    responsibilityChain = new ArrayList<>();
+    responsibilityChain.add(this::requestingHelp);
+    responsibilityChain.add(this::mustLogIn);
+  }
+
+  @Override
+  public String getSyntax() {
+      return "SHOWMYACCOUNTS";
   }
 
   @Override
   public String execute() {
-    try {
-      checkLoggedIn(customer);
-      return String.format("SUCCESS: %s%s", Config.MULTILINE_INFO_SEPARATOR,bank.showAccountsFor(customer));
-    } catch (RequestNotAllowedException ex) {
-      return String.format("FAIL: %s", ex.getMessage());
-    }
+    String message = applyResponsibilityChain();
+    if (!message.isEmpty()) return message;
+
+    return String.format(
+        "SUCCESS: %s%s", Config.MULTILINE_INFO_SEPARATOR, bank.showAccountsFor(customerID)
+    );
   }
 }

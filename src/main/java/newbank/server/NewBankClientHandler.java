@@ -22,7 +22,6 @@ import newbank.server.commands.QuitCommand;
 import newbank.server.commands.RegisterCommand;
 import newbank.server.commands.ShowAccountsCommand;
 import newbank.server.commands.UnknownCommand;
-import newbank.server.exceptions.CommandInvalidSyntaxException;
 
 
 /** The NewBankClientHandler handles all clients requests. */
@@ -58,24 +57,6 @@ public class NewBankClientHandler extends Thread {
     commands.put("HELP", HelpCommand::new);
   }
 
-  private void handleCommandHelp(final Command command) {
-    String syntax = command.getSyntax();
-    if (syntax.isEmpty()) {
-      out.println("No help instruction available");
-    } else {
-      out.format("SUCCESS: Usage: %s\n", syntax);
-    }
-  }
-
-  private void handleCommandInvalidSyntax(final Command command) {
-    String syntax = command.getSyntax();
-    if (syntax.isEmpty()) {
-      out.println("FAIL: unknown syntax.");
-    } else {
-      out.format("FAIL: Usage: %s\n", syntax);
-    }
-  }
-
   private Command getCommand(final String name, final String[] tokens) {
     return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
   }
@@ -88,22 +69,9 @@ public class NewBankClientHandler extends Thread {
     final String commandName = tokens[0].toUpperCase();
     final Command command = getCommand(commandName, tokens);
 
-    if (tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP")) {
-      handleCommandHelp(command);
-      return true;
-    }
+    out.println(command.execute());
 
-    try {
-      out.println(command.execute());
-    } catch (CommandInvalidSyntaxException e) {
-      handleCommandInvalidSyntax(command);
-    }
-
-    if (commandName.equals("QUIT")) {
-      return false;
-    }
-
-    return true;
+    return !commandName.equals("QUIT");
   }
 
   public void run() {
