@@ -17,7 +17,7 @@ public class NewAccountCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "NEWACCOUNT <Name> [Default]";
   }
 

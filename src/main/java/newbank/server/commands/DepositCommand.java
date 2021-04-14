@@ -20,7 +20,7 @@ public class DepositCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "DEPOSIT <account_name> <amount>";
   }
 

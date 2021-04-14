@@ -11,26 +11,8 @@ public abstract class Command {
   /**
    * @return the command syntax
    */
-  protected String getSyntax() {
+  public String getSyntax() {
     return "";
-  }
-
-  public String getUsage() {
-    String syntax = getSyntax();
-    if (syntax.isEmpty()) {
-      return "No help instruction available";
-    }
-
-    return String.format("SUCCESS: Usage: %s", syntax);
-  }
-
-  public String getUsageInvalidSyntax() {
-    String syntax = getSyntax();
-    if (syntax.isEmpty()) {
-      return "FAIL: unknown syntax.";
-    }
-
-    return String.format("FAIL: Usage: %s", syntax);
   }
 
   protected void checkLoggedIn(CustomerID customer) throws RequestNotAllowedException {

@@ -18,7 +18,7 @@ public class DefaultCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "DEFAULT <Name>";
   }
 

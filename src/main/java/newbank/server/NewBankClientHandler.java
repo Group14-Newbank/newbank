@@ -53,9 +53,28 @@ public class NewBankClientHandler extends Thread {
     commands.put("UNKNOWN", UnknownCommand::new);
   }
 
+  private void handleCommandHelp(final Command command) {
+    String syntax = command.getSyntax();
+    if (syntax.isEmpty()) {
+      out.println("No help instruction available");
+    } else {
+      out.format("SUCCESS: Usage: %s\n", syntax);
+    }
+  }
+
+  private void handleCommandInvalidSyntax(final Command command) {
+    String syntax = command.getSyntax();
+    if (syntax.isEmpty()) {
+      out.println("FAIL: unknown syntax.");
+    } else {
+      out.format("FAIL: Usage: %s\n", syntax);
+    }
+  }
+
   private Command getCommand(final String name, final String[] tokens) {
     return commands.getOrDefault(name, UnknownCommand::new).makeCommand(bank, tokens, customer);
   }
+
   private boolean processRequest(final String request) {
     final String[] tokens = request.trim().split("\\s+");
 
@@ -65,13 +84,14 @@ public class NewBankClientHandler extends Thread {
     final Command command = getCommand(commandName, tokens);
 
     if (tokens.length >= 2 && tokens[1].equalsIgnoreCase("HELP")) {
-      out.println(command.getUsage());
-    } else {
-      try {
-        out.println(command.execute());
-      } catch(CommandInvalidSyntaxException e) {
-        out.println(command.getUsageInvalidSyntax());
-      }
+      handleCommandHelp(command);
+      return true;
+    }
+
+    try {
+      out.println(command.execute());
+    } catch (CommandInvalidSyntaxException e) {
+      handleCommandInvalidSyntax(command);
     }
 
     if (commandName.equals("QUIT")) {

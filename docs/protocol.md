@@ -333,3 +333,51 @@
     <td colspan="2"><code>$ PAY John 200.0</code><br /><code>SUCCESS</code></td>
   </tr>
 </table>
+
+<h3>MOVE</h3>
+
+<table>
+  <tr>
+    <td><strong>Description</strong></td>
+    <td colspan="2">Move money from one account to another.</td>
+  </tr>
+  <tr>
+    <td><strong>Syntax</strong></td>
+    <td colspan="2"><code>MOVE account_from account_to amount</code></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>account_from</em></td>
+    <td>The name of the account from which the money is transferred.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td><em>account_to</em></td>
+    <td>The name of the account to which the money is transferred.</td>
+  </tr>
+  <tr>
+    <td><strong>Comments</strong></td>
+    <td colspan="2">
+      <ul>
+         <li>Customers must be logged in in order to use this command.</li>
+         <li>The default currency used is GBP.</li>
+         <li>The amount specified cannot exceed the balance of the account it is transferred from.</li>
+         <li>Two different account names must be provided and both need to belong to the same customer.</li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Returns</strong></td>
+    <td>SUCCESS</td>
+    <td>If the transaction completed successfully.</td>
+  </tr>
+  <tr>
+    <td></td>
+    <td>FAIL <em>message</em></td>
+    <td>If the transaction failed, <em>message</em> provides the error message</td>
+  </tr>
+  <tr>
+    <td><strong>Example</strong></td>
+    <td colspan="2"><code>$ MOVE Main Savings 150.15</code><br /><code>SUCCESS</code></td>
+  </tr>
+</table>

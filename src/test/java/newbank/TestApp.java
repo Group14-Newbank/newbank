@@ -83,19 +83,6 @@ public class TestApp {
   }
 
   @Test
-  public void canDisplayBalance() throws IOException {
-    String response = logIn("Bhagy", "Bhagy123");
-    assertThat(response, containsString("SUCCESS"));
-
-    String accountSummary = testCommand("SHOWMYACCOUNTS\n");
-    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1000.00\\s+GBP"));
-
-    accountSummary = display.getLine();
-    assertThat(accountSummary, matchesPattern("Savings:\\s+201.19\\s+GBP"));
-    assertThat(display.getLine(), equalTo(""));
-  }
-
-  @Test
   public void canCreateNewAccount() throws IOException {
     String response = logIn("John", "John123");
     assertThat(response, containsString("SUCCESS"));
@@ -130,6 +117,77 @@ public class TestApp {
     assertThat(response, equalTo("FAIL: Maximum number of accounts is: 5"));
     response = testCommand("NEWACCOUNT accountG\n");
     assertThat(response, equalTo("FAIL: Maximum number of accounts is: 5"));
+  }
+
+  @Test
+  public void canMoveMoney() throws IOException {
+    String response = logIn("Bhagy", "Bhagy123");
+    assertThat(response, containsString("SUCCESS"));
+
+    String accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1000.00\\s+GBP"));
+
+    accountSummary = display.getLine();
+    assertThat(accountSummary, matchesPattern("Savings:\\s+201.19\\s+GBP"));
+    assertThat(display.getLine(), equalTo(""));
+
+    response = testCommand("MOVE money please\n");
+    assertThat(
+        response, equalTo("FAIL: Usage: MOVE <account_name_from> <account_name_to> <amount>"));
+
+    response = testCommand("MOVE Savings 100\n");
+    assertThat(
+        response, equalTo("FAIL: Usage: MOVE <account_name_from> <account_name_to> <amount>"));
+
+    response = testCommand("MOVE Savings Savings 100\n");
+    assertThat(response, equalTo("FAIL: The accounts must be different to complete a transfer."));
+
+    response = testCommand("MOVE Savings Main 201.20\n");
+    assertThat(response, equalTo("FAIL: Insufficient balance in [Savings], missing: [GBP 0.01]."));
+
+    response = testCommand("MOVE Savings Main -120.23\n");
+    assertThat(response, equalTo("FAIL: The amount must be a positive number: [-120.23]."));
+
+    response = testCommand("MOVE Savings Main 0\n");
+    assertThat(response, equalTo("FAIL: The amount must be a positive number: [0]."));
+
+    response = testCommand("MOVE Savings Main t123\n");
+    assertThat(response, equalTo("FAIL: The specified amount is invalid: [t123]."));
+
+    response = testCommand("MOVE Savings MyMain 99\n");
+    assertThat(response, equalTo("FAIL: Account [MyMain] does not exist."));
+
+    response = testCommand("MOVE Savings Main 101.19\n");
+    assertThat(
+        response, equalTo("SUCCESS: Money transferred from [Savings] to [Main] successfully."));
+
+    // The balances are updated
+    accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1101.19\\s+GBP"));
+    accountSummary = display.getLine();
+    assertThat(accountSummary, matchesPattern("Savings:\\s+100.00\\s+GBP"));
+    assertThat(display.getLine(), equalTo(""));
+
+    response = testCommand("MOVE Main Savings 1100\n");
+    assertThat(
+        response, equalTo("SUCCESS: Money transferred from [Main] to [Savings] successfully."));
+
+    // The balances are updated
+    accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1.19\\s+GBP"));
+    accountSummary = display.getLine();
+    assertThat(accountSummary, matchesPattern("Savings:\\s+1200.00\\s+GBP"));
+    assertThat(display.getLine(), equalTo(""));
+
+    response = testCommand("MOVE Main Savings 2\n");
+    assertThat(response, equalTo("FAIL: Insufficient balance in [Main], missing: [GBP 0.81]."));
+
+    // The balances remain the same
+    accountSummary = testCommand("SHOWMYACCOUNTS\n");
+    assertThat(accountSummary, matchesPattern("[*]Main:\\s+1.19\\s+GBP"));
+    accountSummary = display.getLine();
+    assertThat(accountSummary, matchesPattern("Savings:\\s+1200.00\\s+GBP"));
+    assertThat(display.getLine(), equalTo(""));
   }
 
   @Test
@@ -307,7 +365,7 @@ public class TestApp {
 
     response = testCommand("SHOWMYACCOUNTS\n");
     assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
-    
+
     response = testCommand("PAY Jason 1000.0\n");
     assertThat(response, equalTo("FAIL: Request not allowed, please log in first."));
   }

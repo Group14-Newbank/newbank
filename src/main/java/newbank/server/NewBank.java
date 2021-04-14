@@ -16,8 +16,6 @@ import newbank.server.exceptions.DuplicateCustomerException;
 import newbank.server.exceptions.InsufficientFundsException;
 import newbank.server.exceptions.PasswordInvalidException;
 import newbank.server.exceptions.UsernameInvalidException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class NewBank {
   private static final NewBank bank = new NewBank();
@@ -78,7 +76,7 @@ public class NewBank {
   // Simple algorithm to check that the password meets the security requirements
   // must contain at least one number, uppercase letter and lowercase letter
   private void validatePassword(final String password) throws PasswordInvalidException {
-    if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")){
+    if (!password.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$")) {
       throw new PasswordInvalidException();
     }
   }
@@ -193,7 +191,8 @@ public class NewBank {
     Customer customer = customers.get(customerID.getKey());
     Optional<Account> account = customer.getAccount(accountName);
 
-    return account.orElseThrow(() -> new AccountInvalidException(customer.getUsername(), accountName));
+    return account.orElseThrow(
+        () -> new AccountInvalidException(customer.getUsername(), accountName));
   }
 
   /**
@@ -219,7 +218,10 @@ public class NewBank {
    * @param money The amount to move
    */
   public synchronized void moveMoney(
-      final CustomerID customerID, final String accountNameFrom, final String accountNameTo, final Money money)
+      final CustomerID customerID,
+      final String accountNameFrom,
+      final String accountNameTo,
+      final Money money)
       throws AccountInvalidException, AccountBalanceInsufficientException {
 
     Account accountFrom = getAccount(customerID, accountNameFrom);

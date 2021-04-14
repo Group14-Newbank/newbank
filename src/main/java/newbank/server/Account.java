@@ -9,11 +9,9 @@ import newbank.server.exceptions.AccountNameInvalidException;
 /**
  * Representation of a customer's account.
  *
- * <p>
- * An account is identified by a name and has a balance. An account can be the
- * default account for a customer which means that it will be used (by default)
- * in various transactions. Note that a Savings account cannot be used as the
- * default current account.
+ * <p>An account is identified by a name and has a balance. An account can be the default account
+ * for a customer which means that it will be used (by default) in various transactions. Note that a
+ * Savings account cannot be used as the default current account.
  */
 public class Account {
   private String accountName;
@@ -47,14 +45,16 @@ public class Account {
     }
   }
 
-  private static void validateBalance(final Money openingBalance) throws AccountBalanceInvalidException {
+  private static void validateBalance(final Money openingBalance)
+      throws AccountBalanceInvalidException {
     if (openingBalance.isNegative()) {
       throw new AccountBalanceInvalidException();
     }
   }
 
   public String toString() {
-    return String.format("%s: %.2f %s", accountName, balance.getNumberStripped(), balance.getCurrency());
+    return String.format(
+        "%s: %.2f %s", accountName, balance.getNumberStripped(), balance.getCurrency());
   }
 
   public String getName() {
@@ -65,12 +65,13 @@ public class Account {
     return balance;
   }
 
-  public void moveMoneyToAccount(Account destination, Money amount) throws AccountBalanceInsufficientException {
+  public void moveMoneyToAccount(Account destination, Money amount)
+      throws AccountBalanceInsufficientException {
     if (balance.isLessThan(amount)) {
       throw new AccountBalanceInsufficientException(amount, balance);
     }
 
-    balance = balance.subtract(amount);
+    debit(amount);
     destination.credit(amount);
   }
 

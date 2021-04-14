@@ -23,7 +23,7 @@ public class MoveMoneyCommand extends Command {
     this.customer = customer;
   }
 
-  protected String getSyntax() {
+  public String getSyntax() {
     return "MOVE <account_name_from> <account_name_to> <amount>";
   }
 
@@ -43,6 +43,10 @@ public class MoveMoneyCommand extends Command {
     final String accountNameTo = tokens[2];
     final String amountString = tokens[3];
 
+    if (accountNameFrom.equals(accountNameTo)) {
+      return "FAIL: The accounts must be different to complete a transfer.";
+    }
+
     try {
       final BigDecimal amount = new BigDecimal(amountString);
 
@@ -50,15 +54,20 @@ public class MoveMoneyCommand extends Command {
         return String.format("FAIL: The amount must be a positive number: [%s].", amountString);
       }
 
-      bank.moveMoney(customer, accountNameFrom, accountNameTo, Money.of(amount, Account.DEFAULT_CURRENCY));
+      bank.moveMoney(
+          customer, accountNameFrom, accountNameTo, Money.of(amount, Account.DEFAULT_CURRENCY));
 
-      return String.format("SUCCESS: Money transferred from [%s] to [%s] successfully.", accountNameFrom, accountNameTo);
+      return String.format(
+          "SUCCESS: Money transferred from [%s] to [%s] successfully.",
+          accountNameFrom, accountNameTo);
     } catch (NumberFormatException ex) {
-      return String.format("FAIL: Specified amount [%s] invalid.", amountString);
+      return String.format("FAIL: The specified amount is invalid: [%s].", amountString);
     } catch (AccountInvalidException ex) {
       return String.format("FAIL: Account [%s] does not exist.", ex.getAccountName());
     } catch (AccountBalanceInsufficientException ex) {
-      return String.format("FAIL: Insufficient balance on the account, missing: [%s]", ex.getMissingBalance());
+      return String.format(
+          "FAIL: Insufficient balance in [%s], missing: [%s].",
+          accountNameFrom, ex.getMissingBalance());
     }
   }
 }
