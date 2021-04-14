@@ -106,7 +106,10 @@ public class NewBankClientHandler extends Thread {
     try {
       while (hasMore) {
         String request = in.readLine();
-        out.println(String.format("Received request [%s]", request));
+        if (NewBankServer.VERBOSE_MODE) {
+          // useful for debugging/testing, not meant for production
+          out.println(String.format("Received request [%s]", request));
+        }
 
         hasMore = processRequest(request);
       }

@@ -11,6 +11,13 @@ public abstract class Display {
    * @param message
    */
   public abstract void writeLine(final String message);
+  
+  /**
+   * Write a message onto the display
+   *
+   * @param message
+   */
+  public abstract void write(final String message);
 
   /**
    * Retrieve a line terminated message from the display

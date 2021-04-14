@@ -9,6 +9,11 @@ public class ConsoleDisplay extends Display {
   }
 
   @Override
+  public void write(String message) {
+    System.out.print(message);
+  }
+
+  @Override
   public String getLine() {
     throw new RuntimeException("Not supported for console output");
   }
