@@ -353,7 +353,7 @@ public class TestApp {
     assertThat(response, containsString("SUCCESS"));
 
     response = testCommand("PAY John 1000.0\n");
-    assertThat(response, containsString("FAIL: Insufficient funds to perform transaction."));
+    assertThat(response, containsString("FAIL: Insufficient funds"));
   }
 
   @Test

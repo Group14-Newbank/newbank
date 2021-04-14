@@ -67,7 +67,7 @@ public class Account {
   public void moveMoneyToAccount(Account destination, Money amount)
       throws AccountBalanceInsufficientException {
     if (balance.isLessThan(amount)) {
-      throw new AccountBalanceInsufficientException(amount, balance);
+      throw new AccountBalanceInsufficientException(amount, this);
     }
 
     debit(amount);
