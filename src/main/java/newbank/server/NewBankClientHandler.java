@@ -59,7 +59,7 @@ public class NewBankClientHandler extends Thread {
 
     out.println(command.execute());
 
-    return !commandName.equals("QUIT");
+    return !request.equals("QUIT");
   }
 
   public void run() {
